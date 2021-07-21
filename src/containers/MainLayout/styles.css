@@ -1,0 +1,12 @@
+.show-portis {
+    background: linear-gradient(90deg, #b06aec 0%, #7839d5 100%);
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    border-radius: 3px;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+}
