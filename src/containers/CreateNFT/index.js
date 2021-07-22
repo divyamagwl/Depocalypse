@@ -1,10 +1,12 @@
-import React from 'react'
-import { useState } from "react";
-import './CreateNFT.css'
+import React, { useState } from 'react'
+import './styles.css'
+
 import { NFTStorage, File } from 'nft.storage'
 
+function CreateNFT(props) {
 
-function CreateNFT() {
+    console.log("create-nft")
+    console.log(props);
 
     const dataURItoBlob = (dataURI) => {
         var byteString = atob(dataURI.split(',')[1]);

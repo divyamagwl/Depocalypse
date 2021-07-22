@@ -5,7 +5,7 @@ import Logout from "../../components/Logout";
 
 import { portis } from "../../services/web3";
 
-function MainLayout() {
+function MainLayout(props) {
 
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [wallet, setWallet] = useState("");
@@ -48,6 +48,8 @@ function MainLayout() {
             Your etherwallet is {wallet}
         </div>
         }
+
+        {props.children}
         
     </div>
   );

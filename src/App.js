@@ -1,15 +1,16 @@
-import './App.css';
+import { BrowserRouter as Router } from "react-router-dom";
+import BaseRouter from "./routes";
+
 import MainLayout from "./containers/MainLayout";
-import CreateNFT from './CreateNFT';
 
 function App() {
   return (
     <div>
-      <MainLayout/>
-
-
-      {/* nft form to store data */}
-      <CreateNFT  /* need to pass user wallet address */ />
+      <Router>
+        <MainLayout>
+          <BaseRouter />
+        </MainLayout>
+      </Router>
     </div>
   );
 }
