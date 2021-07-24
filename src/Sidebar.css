@@ -1,0 +1,94 @@
+.sidebar{
+    display: flex;
+    flex-direction: column;
+    background-color: black;
+    height: 100vh;
+    flex: 0.25;
+    position: -webkit-sticky;
+    color: white;
+    position: sticky;
+    top: 0;
+    min-width: 300px;
+    background-color: #26272E;
+    border-right: 1px solid gray;
+
+}
+
+.sidebar__logo{
+    border-bottom: 1px solid gray;
+}
+
+.sidebar__logo > h2{
+    background: #4664F0;
+    background: -webkit-linear-gradient(top left, #4664F0, #FC8DFF);
+    background: -moz-linear-gradient(top left, #4664F0, #FC8DFF);
+    background: linear-gradient(to bottom right, #4664F0, #FC8DFF);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text ;
+}
+
+.sidebar__options > h3{
+    padding: 16px;
+    text-align: left;
+    margin: 10px;
+    font-weight: 500;
+}
+
+.sidebar__options > h3:hover{
+    background-color: #4664F0;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px #4664F0AA
+}
+
+.sidebar__options{
+    flex: 1;
+}
+
+.sidebar__user{
+    border-top: 1px solid gray;
+}
+
+.sidebar__userWallet{
+    /* background: #4664F0;
+    background: -webkit-linear-gradient(top left, #4664F0, #FC8DFF);
+    background: -moz-linear-gradient(top left, #4664F0, #FC8DFF);
+    background: linear-gradient(to bottom right, #4664F0AF, #FC8DFFAF); */
+    border: 1px solid gray;
+    color: white;
+    margin: 10px;
+    border-radius: 10px;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    overflow-wrap: break-word;
+}
+
+.sidebar__userWalletAddress{
+    margin-top: 10px;
+    margin-right: 10px;
+    margin-left: 10px;
+}
+
+.sidebar__userInfo{
+    margin: 10px;
+    font-size: large;
+    font-weight: 600;
+}
+
+.show-portis {
+    background: linear-gradient(90deg, #b06aec 0%, #7839d5 100%);
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    display: flex;
+    font-size: 16px;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.show-portis > img{
+    height: 20px;
+}
