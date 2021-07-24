@@ -4,11 +4,17 @@ import CreateNFT from './containers/CreateNFT';
 import Market from './containers/Market';
 import './BaseRouter.css'
 
-const BaseRouter = () => (
+const BaseRouter = ({wallet, isLoggedIn}) => (
   <div className='base__router'>
     <Switch>
       <Route exact path='/' component={Market} />
-      <Route exact path='/create-nft' component={CreateNFT} />
+      <Route exact path='/create-nft' 
+      render={() => (
+        <CreateNFT 
+          wallet={wallet} 
+          isLoggedIn={isLoggedIn}
+        />
+      )}/>
     </Switch>
   </div>
 );
