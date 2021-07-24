@@ -1,0 +1,5 @@
+.purchase{
+    display: grid;
+    grid-template-columns: 50% 50%;
+    flex: 1;
+}
