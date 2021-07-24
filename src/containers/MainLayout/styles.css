@@ -3,10 +3,14 @@
     border: none;
     color: white;
     padding: 15px 32px;
-    border-radius: 3px;
     cursor: pointer;
     text-align: center;
     text-decoration: none;
     display: inline-block;
     font-size: 16px;
+}
+
+.main__layout{
+    display: flex;
+    justify-content: space-between;
 }

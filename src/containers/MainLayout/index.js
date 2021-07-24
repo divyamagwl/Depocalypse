@@ -1,14 +1,18 @@
 import React, { useEffect, useState } from "react";
 import "./styles.css";
+import { Icon, InlineIcon } from '@iconify/react';
+import ethereumIcon from '@iconify-icons/mdi/ethereum';
 
 import Logout from "../../components/Logout";
 
 import { portis } from "../../services/web3";
+import Sidebar from "../../Sidebar";
 
 function MainLayout(props) {
 
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [wallet, setWallet] = useState("");
+    const [email, setEmail] = useState("");
 
     useEffect(() => {
         onLogin();
@@ -16,8 +20,10 @@ function MainLayout(props) {
     }, [])
 
     async function onLogin() {
-        portis.onLogin(wallet => {
+        portis.onLogin( (wallet, email, reputation) => {
+            console.log(wallet, email, reputation);
             setWallet(wallet);
+            setEmail(email);
         });
     }
 
@@ -35,8 +41,8 @@ function MainLayout(props) {
     }
   
     return (
-    <div>
-        <button className="show-portis" onClick={showPortis}>Show Account</button>
+    <div className="main__layout">
+        {/* <button className="show-portis" onClick={showPortis}>Show Account</button>
 
         {isLoggedIn && 
         <div>
@@ -47,10 +53,18 @@ function MainLayout(props) {
             />
             Your etherwallet is {wallet}
         </div>
-        }
+        } */}
 
-        {props.children}
-        
+            <Sidebar 
+                showPortis={showPortis}
+                isLoggedIn={isLoggedIn}
+                setWallet={setWallet}
+                setIsLoggedIn={setIsLoggedIn}
+                wallet={wallet}
+                email={email}
+            />
+
+            {props.children}
     </div>
   );
 }
