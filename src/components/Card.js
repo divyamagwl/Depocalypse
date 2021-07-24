@@ -1,5 +1,5 @@
 import React from 'react'
-import './Card.css'
+import '../styles/Card.css';
 import { Icon, InlineIcon } from '@iconify/react';
 import ethereumIcon from '@iconify-icons/mdi/ethereum';
 

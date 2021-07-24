@@ -1,12 +1,9 @@
 import React, { useState } from 'react'
-import './styles.css'
+import '../styles/CreateNFT.css'
 
 import { NFTStorage, File } from 'nft.storage'
 
-function CreateNFT(props) {
-
-    console.log("create-nft")
-    console.log(props);
+function CreateNFT({wallet, isLoggedIn}) {
 
     const dataURItoBlob = (dataURI) => {
         var byteString = atob(dataURI.split(',')[1]);
@@ -52,6 +49,11 @@ function CreateNFT(props) {
     const handleSubmit = async (e) =>  {
 
         e.preventDefault();
+
+        if(!isLoggedIn) {
+          window.alert("Please log in to mint NFT");
+          return;
+        }
         // var image = new File([''], "this.jpeg", {type: "image/*"});
         var image = dataURItoBlob(dataUri);
         // api key for nft.storage
