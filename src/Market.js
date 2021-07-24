@@ -1,0 +1,39 @@
+import React from 'react'
+import Card from './Card'
+import  './Market.css'
+
+function Market() {
+    return (
+        <div className='market'> 
+                <Card
+                name='Cool Cat'
+                description='very cool nft cat'
+                src='https://ipfs.io/ipfs/bafybeihqpmqde5hnlio333nvuej3qq6qduav6atwmsmsbqsob5m4iem5b4/blob'
+                price='10 ETH'
+                />
+
+                <Card
+                name='ghost'
+                description='a ghost which goes up and down there is fjakdjf afjakfj afdjakfdj  afajfkajksdf kajf ajklfjak jfkljk very bid djf kjk skdajf afjkla fajalkjsdfk aksldfjka jsdfkljakfjaks ajdsfkaj sdkfjaksdf jkajfkakdlfjkajfkajkfjakfjkaj fkj'
+                src='https://ipfs.io/ipfs/bafybeigxsjz6zle4n4h7tzs75wix5zmba55jtfq32pv6loe3zmtgf3ou5y/blob'
+                price='10 ETH'
+                />
+
+                <Card
+                name='Einstein'
+                description='einstein is smart'
+                src='https://ipfs.io/ipfs/bafybeienkzpouj7lrx4gav7xbgyycxtf6i3d7dmzbokgrlhusjvyirnb2u/blob'
+                price='10 ETH'
+                />
+
+                <Card
+                name='Coin spin'
+                description='coin spins, and spins, till there is a '
+                src='https://ipfs.io/ipfs/bafybeienkzpouj7lrx4gav7xbgyycxtf6i3d7dmzbokgrlhusjvyirnb2u/blob'
+                price='10 ETH'
+                />
+        </div>
+    )
+}
+
+export default Market
