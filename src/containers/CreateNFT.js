@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import './styles.css'
+import '../styles/CreateNFT.css'
 
 import { NFTStorage, File } from 'nft.storage'
 

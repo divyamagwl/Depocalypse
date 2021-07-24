@@ -1,8 +1,8 @@
 import React from 'react'
-import './Sidebar.css'
+import '../styles/Sidebar.css'
 import { Icon, InlineIcon } from '@iconify/react';
 import ethereumIcon from '@iconify-icons/mdi/ethereum';
-import Logout from './components/Logout';
+import Logout from './Logout';
 
 function Sidebar({showPortis, isLoggedIn, setWallet, setIsLoggedIn, wallet, email}) {
     return (

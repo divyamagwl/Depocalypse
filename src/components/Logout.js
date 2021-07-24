@@ -1,7 +1,7 @@
 import React from "react";
-import "./styles.css";
+import "../styles/Logout.css";
 
-import { portis } from "../../services/web3";
+import { portis } from "../services/web3";
 
 function Logout(props) {
 

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 import CreateNFT from './containers/CreateNFT';
-import Market from './Market';
+import Market from './containers/Market';
 import './BaseRouter.css'
 
 const BaseRouter = () => (

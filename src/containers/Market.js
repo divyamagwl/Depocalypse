@@ -1,6 +1,6 @@
 import React from 'react'
-import Card from './Card'
-import  './Market.css'
+import Card from '../components/Card'
+import  '../styles/Market.css'
 
 function Market() {
     return (
