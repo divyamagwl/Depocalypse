@@ -1,8 +1,17 @@
 .App {
   text-align: center;
+  /* display: flex;   */
+  /* justify-content: space-around; */
+  
+
+  /* background-image: url('https://www.teahub.io/photos/full/12-127037_download-wallpaper-colorful-dark-aesthetic-gradient-background.jpg');
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-size: cover; */
 }
 
-.App-logo {
+
+/* .App-logo {
   height: 40vmin;
   pointer-events: none;
 }
@@ -35,4 +44,7 @@
   to {
     transform: rotate(360deg);
   }
-}
+} */
+
+
+
