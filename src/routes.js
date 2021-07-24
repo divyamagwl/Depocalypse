@@ -1,12 +1,13 @@
 import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 import CreateNFT from './containers/CreateNFT';
-import Home from './containers/Home';
+import Market from './Market';
+import './BaseRouter.css'
 
 const BaseRouter = () => (
-  <div>
+  <div className='base__router'>
     <Switch>
-      <Route exact path='/' component={Home} />
+      <Route exact path='/' component={Market} />
       <Route exact path='/create-nft' component={CreateNFT} />
     </Switch>
   </div>
