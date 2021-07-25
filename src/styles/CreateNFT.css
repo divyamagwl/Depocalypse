@@ -1,32 +1,103 @@
-/* createNFT */
-@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap');
 .create {
-    max-width: 400px;
-    margin: 0 auto;
-    text-align: center;
-  }
-  .create label {
+  font-family: Arial, Helvetica, sans-serif;
+  display: grid;
+  grid-template-columns: 50% 50%;
+  flex: 1;
+
+  min-width: 600px;
+  align-content: center;
+  
+  /* height: 100vh; */
+  grid-template-rows: 10% 90%;
+
+  color: white;
+}
+
+.create__artwork{
+  justify-self: center;
+
+  align-self: center;
+}
+
+.create__artwork > img{
+  width: 80%;
+  border-radius: 16px;
+
+  box-shadow: 0px 6px 18px -9px rgba(0, 0,
+  0, 0.75);
+}
+
+.create__details{
+    padding-right: 24px;
+    display: flex;
+    flex-direction: column;
+
     text-align: left;
-    display: block;
-  }
-  .create h2 {
-    font-size: 20px;
-    color: #f1356d;
-    margin-bottom: 30px;
-  }
-  .create input, .create textarea, .create select {
+    /* justify-self: center; */
+    align-self: center;
+}
+
+.create__details > h1{
+  margin: 0;
+}
+
+.create__details label {
+    font-weight: 300;
+}
+
+.create__details input, .create__details textarea, .create__details select {
+    
+    font-size: 16px;
+    font-family: Arial, Helvetica, sans-serif;
+    background: rgba( 1, 0, 0, 0.10 );
+    /* box-shadow: 0 8px 32px 0 rgba(177, 75, 245, 0.05); */
+    backdrop-filter: blur( 1.0px );
+    -webkit-backdrop-filter: blur( 1.0px );
+    border-radius: 10px;
+    border: 1px solid rgba( 255, 255, 255, 0.18 );
+
+    outline-width: 0;
+    color: white;
     width: 100%;
-    padding: 6px 10px;
-    margin: 10px 0;
-    border: 1px solid #ddd;
+    padding: 10px 6px;
+    margin: 8px 0px;
+    
     box-sizing: border-box;
     display: block;
-  }
-  .create button {
-    background: #f1356d;
-    color: #fff;
-    border: 0;
-    padding: 8px;
     border-radius: 8px;
-    cursor: pointer;
   }
+
+  .create__details textarea{
+    resize: none;
+    height: 100px;
+  }
+
+
+
+.create__details button {
+  background: linear-gradient(90deg, #b06aec 0%, #7839d5 100%);
+  border: none;
+  color: white;
+  padding: 15px 32px;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  font-size: 16px;
+  border-radius: 6px;
+  width: 200px;
+}
+
+.goback{
+    justify-self: center;
+    width: 80%;
+    color: white;
+    text-align: left;
+    font-size: 30px;
+    align-self: center;
+}
+
+.poweredBy{
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+}

@@ -3,6 +3,10 @@ import '../styles/CreateNFT.css'
 
 import { NFTStorage, File } from 'nft.storage'
 
+import { Icon, InlineIcon } from '@iconify/react';
+import ethereumIcon from '@iconify-icons/mdi/ethereum';
+import keyboardBackspace from '@iconify-icons/mdi/keyboard-backspace';
+
 function CreateNFT({wallet, isLoggedIn}) {
 
     const dataURItoBlob = (dataURI) => {
@@ -30,6 +34,7 @@ function CreateNFT({wallet, isLoggedIn}) {
     const [market, setMarket] = useState('Sell');
     const [dataUri, setDataUri] = useState('')
     const [storageUrl, setStorageUrl] = useState('')
+    const [price, setPrice] = useState('')
 
     const onChange = (file) => {
     
@@ -60,6 +65,7 @@ function CreateNFT({wallet, isLoggedIn}) {
         const apiKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweDU4MTE5QzJENWQ1NEMwOEJmZWE2MjA1OWU3RjI4YjU2MGE5RUI2ZTUiLCJpc3MiOiJuZnQtc3RvcmFnZSIsImlhdCI6MTYyNjg5NjgzODI3NiwibmFtZSI6IkRlcG9jYWx5cHNlIn0.Lv5KWNAqcMI3aSkYg7Se396dsJ8miK586XuILazSg_M'
         const client = new NFTStorage({ token: apiKey })
         
+        // price and sell/auction
         const nft = { name, description, image };
         const metadata = await client.store(nft);
         setStorageUrl(metadata.url);
@@ -70,41 +76,64 @@ function CreateNFT({wallet, isLoggedIn}) {
 
     return (
         <div className="create">
-            <h2>Mint a new NFT</h2>
-            <form onSubmit={handleSubmit}>
-                <label>Name</label>
-                <input 
-                type="text" 
-                required 
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                />
+            <div className="goback">
+                    <Icon icon={keyboardBackspace} /> 
+            </div>
+            <div className='poweredBy'>
+                  <h3>Powered by NFT.Storage </h3>   
+                  {/* <img src="https://docs.filecoin.io/images/filecoin-symbol-color.svg" width='40' alt="filecoin" />
+                  <img src="https://docs.ipfs.io/images/ipfs-logo.svg" width='40' alt="ipfs" /> */}
+            </div>
+            <div className="create__artwork">
+              <img src={dataUri===''? 'https://avatars.githubusercontent.com/ethereum': dataUri} alt="upload artwork"/>     
+            </div>
 
-                <label>Description</label>
-                <textarea
-                required
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                ></textarea>
+            <div className="create__details">
+              <h1>Mint a new NFT 🖌</h1>
+              <form onSubmit={handleSubmit}>
+                  <label>Name</label>
+                  <input 
+                  type="text" 
+                  required 
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  />
 
-                <label>Image/GIF Upload</label>
-                <img /*width="200" */height="200" src={dataUri===''? 'https://avatars.githubusercontent.com/ethereum': dataUri} alt="upload artwork"/>
-                <input type="file" onChange={(event) => onChange(event.target.files[0] || null)} />
-                
-                <label>NFT is for</label>
-                <select
-                value={market}
-                onChange={(e) => setMarket(e.target.value)}
-                >
-                <option value="Sell">Sell</option>
-                <option value="Auction">Auction</option>
-                </select>
+                  <label>Description</label>
+                  <textarea
+                  required
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  ></textarea>
 
-                <label>{storageUrl}</label>
+                  <label>Image/GIF Upload</label>
+                  <input type="file" onChange={(event) => onChange(event.target.files[0] || null)} />
 
-                <button>Mint NFT</button>
-            </form>
-    </div>
+                  <label>Price in ETH</label>
+                  <input 
+                  required
+                  type="number" 
+                  min="0.01"
+                  step="0.01" 
+                  value={price}
+                  onChange={(e) => setPrice(e.target.value)}
+                  />
+                  
+                  <label>NFT is for</label>
+                  <select
+                  value={market}
+                  onChange={(e) => setMarket(e.target.value)}
+                  >
+                  <option value="Sell">Sell</option>
+                  <option value="Auction">Auction</option>
+                  </select>
+
+                  <label>{storageUrl}</label>
+
+                  <button>Mint NFT</button>
+              </form>
+            </div>
+        </div>
     )
 }
 
