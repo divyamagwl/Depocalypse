@@ -3,8 +3,11 @@ import '../styles/Sidebar.css'
 import { Icon, InlineIcon } from '@iconify/react';
 import ethereumIcon from '@iconify-icons/mdi/ethereum';
 import Logout from './Logout';
+import { useHistory } from 'react-router-dom'
 
 function Sidebar({showPortis, isLoggedIn, setWallet, setIsLoggedIn, wallet, email}) {
+    const { push } = useHistory()
+
     return (
         <div className='sidebar'>
             <div className="sidebar__logo">
@@ -12,14 +15,22 @@ function Sidebar({showPortis, isLoggedIn, setWallet, setIsLoggedIn, wallet, emai
             </div>
 
             <div className="sidebar__options">
-                <h3>Marketplace</h3>
-                <h3>Auctions</h3>
-                <h3>Your Gallery</h3>
+                <h3 onClick={() => push('/')}>Marketplace</h3>
+                <h3 onClick={() => push('/auction')}>Auctions</h3>
+                <h3 onClick={() => push('/your-gallery')}>Your Gallery</h3>
+                {
+                    isLoggedIn &&
+                    <Logout
+                        setWallet={setWallet}
+                        setIsLoggedIn={setIsLoggedIn}
+                        wallet={wallet}
+                    />
+                }
             </div>
 
             
 
-            <button className="show-portis" onClick={showPortis}>Show Account <img src="https://docs.portis.io/_media/logo_bw.svg" alt="powered by portis" /></button>
+            
 
             {isLoggedIn && 
 
@@ -36,16 +47,11 @@ function Sidebar({showPortis, isLoggedIn, setWallet, setIsLoggedIn, wallet, emai
                     <div className="sidebar__userInfo">
                         {email}
                     </div>
-                    <div>
-                    <Logout 
-                        setWallet={setWallet}
-                        setIsLoggedIn={setIsLoggedIn}
-                        wallet={wallet}
-                    />
-                    </div>
+                    
                 </div>
-                
             }
+
+            <button className="show-portis" onClick={showPortis}>Show Account <img src="https://docs.portis.io/_media/logo_bw.svg" alt="powered by portis" /></button>
         </div>
     )
 }
