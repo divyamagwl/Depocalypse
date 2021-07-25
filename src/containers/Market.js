@@ -29,7 +29,7 @@ function Market() {
                 <Card
                 name='Coin spin'
                 description='coin spins, and spins, till there is a '
-                src='https://ipfs.io/ipfs/bafybeienkzpouj7lrx4gav7xbgyycxtf6i3d7dmzbokgrlhusjvyirnb2u/blob'
+                src='https://images.squarespace-cdn.com/content/v1/5857eeba9de4bb486e1ba151/1617454647979-WWZJY0BDAYR9AUS496PH/IMG_0519.GIF'
                 price='10 ETH'
                 />
         </div>
