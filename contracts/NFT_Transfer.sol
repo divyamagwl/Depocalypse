@@ -86,4 +86,200 @@ contract NFT_Transfer is ERC721{
       }
       return userNfts;
     }
+
+
+
+  // Auction contract starts here
+  /// @title Auction
+  /// @notice Create/Cancel Auction and Bid/Tranfer NFT
+
+  enum AuctionStatus { Active, Cancelled, Completed }
+
+  struct Auction {
+    // static
+    uint nft; // NFT ID
+    address seller; // Current owner of NFT
+    uint128 bidIncrement; // Minimum bid increment (in Wei)
+    uint256 duration; // Block count for when the auction ends
+    uint256 startBlock; // Block number when auction started
+    uint256 startedAt; // Approximate time for when the auction was started
+
+    // state
+    mapping (address => uint256) fundsByBidder; // Mapping of addresses to funds
+    uint256 highestBid; // Current highest bid
+    address highestBidder; // Address of current highest bidder
+    bool cancelled; // Flag for cancelled auctions
+  }
+
+  uint totalAuctions;
+
+  mapping (address => mapping(uint256 => uint256)) nftToTokenIdToAuctionId;
+  Auction[] public auctions;
+
+
+  event AuctionCreated(uint id, uint nftId);
+
+  function getAuctionsCount() public view returns (uint256) {
+    return auctions.length;
+  }
+
+
+  function getAuction(uint256 _auctionId)
+    external view returns (
+    uint256 id,
+    uint nft,
+    address seller,
+    uint256 bidIncrement,
+    uint256 duration,
+    uint256 startedAt,
+    uint256 startBlock,
+    AuctionStatus status,
+    uint256 highestBid,
+    address highestBidder
+  ) {
+    Auction storage _auction = auctions[_auctionId];
+    AuctionStatus _status = _getAuctionStatus(_auctionId);
+    return (
+      _auctionId,
+      _auction.nft,
+      _auction.seller,
+      _auction.bidIncrement,
+      _auction.duration,
+      _auction.startedAt,
+      _auction.startBlock,
+      _status,
+      _auction.highestBid,
+      _auction.highestBidder
+    );
+  }
+
+
+  // @dev Return bid for given auction ID and bidder
+  function getBid(uint256 _auctionId, address bidder)
+    external view returns (uint256 bid)
+  {
+    Auction storage auction = auctions[_auctionId];
+    return auction.fundsByBidder[bidder];
+  }
+
+
+  // @dev Creates and begins a new auction.
+  // @_duration is in seconds and is converted to block count.
+  function createAuction(
+    uint _nft,
+    uint256 _bidIncrement,
+    uint256 _duration
+  )
+    external
+  {
+    // Require msg.sender to own nft
+    require(NftOwnership[_nft] == msg.sender);
+
+    // Require duration to be at least a minute and calculate block count
+    require(_duration >= 60);
+
+    // TODO: duration count check
+    // uint256 durationBlockCount = _duration.div(uint256(14));
+    // TODO: NFT transfer to self
+    // nftContract.transferFrom(msg.sender, this, _tokenId);
+
+    totalAuctions++;
+
+    Auction storage _auction = auctions.push();
+    _auction.nft = _nft;
+    _auction.seller = msg.sender;
+    _auction.bidIncrement = uint128(_bidIncrement);
+    _auction.duration = _duration;
+    _auction.startedAt = block.timestamp;
+    _auction.startBlock = block.number;
+    _auction.highestBid = 0;
+    _auction.highestBidder = address(0);
+    _auction.cancelled = false;
+
+
+    // Add auction index to nftToTokenIdToAuctionId mapping
+    // nftToTokenIdToAuctionId[_nftAddress][_tokenId] = totalAuctions;
+
+    emit AuctionCreated(totalAuctions, _nft);
+  }
+
+
+  function bid(uint256 _auctionId)
+    external
+    payable
+    statusIs(AuctionStatus.Active, _auctionId)
+    returns (bool success)
+  {
+    require(msg.value > 0);
+
+    Auction storage auction = auctions[_auctionId];
+
+    // Require newBid be greater than or equal to highestBid + bidIncrement
+    uint256 newBid = auction.fundsByBidder[msg.sender] + msg.value;
+    require(newBid >= auction.highestBid + auction.bidIncrement);
+
+    // Update fundsByBidder mapping
+    auction.highestBid = newBid;
+    auction.highestBidder = msg.sender;
+    auction.fundsByBidder[auction.highestBidder] = newBid;
+
+    // TODO: emit event
+    // Emit BidCreated event
+    // BidCreated(_auctionId, auction.nftAddress, auction.tokenId, msg.sender, newBid);
+    return true;
+  }
+
+
+  function cancelAuction(uint256 _auctionId) external {
+    _cancelAuction(_auctionId);
+  }
+
+
+  // @dev Cancels an auction unconditionally.
+  function _cancelAuction(uint256 _auctionId)
+    internal
+    statusIs(AuctionStatus.Active, _auctionId)
+    onlySeller(_auctionId)
+  {
+    Auction storage auction = auctions[_auctionId];
+    auction.cancelled = true;
+    auction.highestBidder = address(0);
+
+    // TODO: NFT Transfer
+    // _removeAuction(auction.nftAddress, auction.tokenId);
+    // _transfer(auction.nftAddress, auction.seller, auction.tokenId);s
+
+    // TODO: emit event
+    // AuctionCancelled(_auctionId, auction.nftAddress, auction.tokenId);
+  }
+
+
+  function _getAuctionStatus(uint256 _auctionId)
+    internal view returns (AuctionStatus)
+  {
+    Auction storage auction = auctions[_auctionId];
+
+    if (auction.cancelled) {
+      return AuctionStatus.Cancelled;
+    }
+    else if (auction.startBlock + auction.duration < block.number) {
+      return AuctionStatus.Completed;
+    }
+    else {
+      return AuctionStatus.Active;
+    }
+  }
+
+
+  modifier statusIs(AuctionStatus expectedStatus, uint256 _auctionId) {
+    require(expectedStatus == _getAuctionStatus(_auctionId));
+    _;
+  }
+
+  modifier onlySeller(uint256 _auctionId) {
+    Auction storage auction = auctions[_auctionId];
+    require(msg.sender == auction.seller);
+    _;
+  }
+
 }
