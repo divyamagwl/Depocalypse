@@ -96,9 +96,19 @@
 .goback{
     justify-self: center;
     width: 80%;
-    color: white;
     text-align: left;
-    font-size: 30px;
     align-self: center;
+}
+
+.gobackButton{
+    font-size: 30px;
+    color: white;
+    cursor: pointer;
+    transition-duration: 100ms; 
+}
+
+.gobackButton:hover{
+    color: #b97cff;
+    font-size: 45px; 
 }
 

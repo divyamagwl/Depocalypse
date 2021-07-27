@@ -3,24 +3,27 @@ import '../styles/Purchase.css'
 import { Icon, InlineIcon } from '@iconify/react';
 import ethereumIcon from '@iconify-icons/mdi/ethereum';
 import keyboardBackspace from '@iconify-icons/mdi/keyboard-backspace';
+import { useHistory } from 'react-router-dom'
 
+function Purchase(props) {
+    const { push } = useHistory()
 
-function Purchase() {
+    const tokenID = props.match.params.tokenID;
+
     return (
             <div className='purchase'>
                 <div className="goback">
-                    <Icon icon={keyboardBackspace} /> 
+                    <Icon icon={keyboardBackspace} onClick={() => push('/')} className='gobackButton'/> 
                 </div>
                 <div>
-                  
+                    
                 </div>
                 <div className="purchase__artwork">
                     <img src="https://images.squarespace-cdn.com/content/v1/5857eeba9de4bb486e1ba151/1617454647979-WWZJY0BDAYR9AUS496PH/IMG_0519.GIF" alt="nft artwork" />
-                    
                 </div>
 
                 <div className="purchase__details">
-                    <h1>Cool Dude</h1>
+                    <h1>#{tokenID} Cool Dude</h1>
                     <h3>This dude dances and move his shoulders, 
                         make sure you watch him doing more moves in secret. 
 
@@ -42,8 +45,6 @@ function Purchase() {
                     </div>
                 </div>
             </div>
-        
-    
     )
 }
 

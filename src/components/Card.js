@@ -2,11 +2,17 @@ import React from 'react'
 import '../styles/Card.css';
 import { Icon, InlineIcon } from '@iconify/react';
 import ethereumIcon from '@iconify-icons/mdi/ethereum';
+import { useHistory } from 'react-router-dom'
 
 
-function Card({name, description, src, price}) {
+
+function Card({tokenID, name, description, src, price}) {
+    const { push } = useHistory()
+
+
+
     return (
-        <div className='card'>
+        <div className='card' onClick={() => push('/market/' + tokenID)}>
             <img src={src} alt="nft artwork" />
             <div className="card__info">
                 <h2>{name}</h2>

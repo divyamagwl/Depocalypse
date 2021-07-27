@@ -6,8 +6,10 @@ import { NFTStorage, File } from 'nft.storage'
 import { Icon, InlineIcon } from '@iconify/react';
 import ethereumIcon from '@iconify-icons/mdi/ethereum';
 import keyboardBackspace from '@iconify-icons/mdi/keyboard-backspace';
+import { useHistory } from 'react-router-dom'
 
 function CreateNFT({wallet, isLoggedIn}) {
+    const { push } = useHistory()
 
     const dataURItoBlob = (dataURI) => {
         var byteString = atob(dataURI.split(',')[1]);
@@ -77,7 +79,7 @@ function CreateNFT({wallet, isLoggedIn}) {
     return (
         <div className="create">
             <div className="goback">
-                    <Icon icon={keyboardBackspace} /> 
+                    <Icon icon={keyboardBackspace } onClick={() => push('/')} className='gobackButton'/> 
             </div>
             <div className='poweredBy'>
                   <h3>Powered by NFT.Storage </h3>   
@@ -85,7 +87,7 @@ function CreateNFT({wallet, isLoggedIn}) {
                   <img src="https://docs.ipfs.io/images/ipfs-logo.svg" width='40' alt="ipfs" /> */}
             </div>
             <div className="create__artwork">
-              <img src={dataUri===''? 'https://avatars.githubusercontent.com/ethereum': dataUri} alt="upload artwork"/>     
+              <img src={dataUri===''? 'https://thumbs.gfycat.com/EqualPowerfulKoodoo-size_restricted.gif': dataUri} alt="upload artwork"/>     
             </div>
 
             <div className="create__details">
@@ -109,6 +111,15 @@ function CreateNFT({wallet, isLoggedIn}) {
                   <label>Image/GIF Upload</label>
                   <input type="file" onChange={(event) => onChange(event.target.files[0] || null)} />
 
+                  <label>NFT is for</label>
+                  <select
+                  value={market}
+                  onChange={(e) => setMarket(e.target.value)}
+                  >
+                  <option value="Sell">Sell</option>
+                  <option value="Auction">Auction</option>
+                  </select>
+
                   <label>Price in ETH</label>
                   <input 
                   required
@@ -119,15 +130,6 @@ function CreateNFT({wallet, isLoggedIn}) {
                   onChange={(e) => setPrice(e.target.value)}
                   />
                   
-                  <label>NFT is for</label>
-                  <select
-                  value={market}
-                  onChange={(e) => setMarket(e.target.value)}
-                  >
-                  <option value="Sell">Sell</option>
-                  <option value="Auction">Auction</option>
-                  </select>
-
                   <label>{storageUrl}</label>
 
                   <button>Mint NFT</button>

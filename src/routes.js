@@ -17,8 +17,11 @@ const BaseRouter = ({wallet, isLoggedIn}) => (
         />
       )}/>
       <Route exact path='/nft' component={Purchase}/>
+      <Route path="/market/:tokenID" component={Purchase} />
     </Switch>
   </div>
 );
+
+
 
 export default BaseRouter;
