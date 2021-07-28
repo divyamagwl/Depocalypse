@@ -13,7 +13,7 @@ function Card({tokenID, name, description, src, price}) {
 
     return (
         <div className='card' onClick={() => push('/market/' + tokenID)}>
-            <img src={src} alt="nft artwork" />
+            <img src={"https://ipfs.io/ipfs/" + src.slice(7)} alt="nft artwork" />
             <div className="card__info">
                 <h2>{name}</h2>
                 <h4>{description.length >= 100 ? description.substring(0, 100) + '...' : description}</h4>

@@ -7,11 +7,14 @@ import { Icon, InlineIcon } from '@iconify/react';
 import ethereumIcon from '@iconify-icons/mdi/ethereum';
 import keyboardBackspace from '@iconify-icons/mdi/keyboard-backspace';
 import { useHistory } from 'react-router-dom'
+import { mintNFT } from "../services/web3";
 
 function CreateNFT({wallet, isLoggedIn}) {
-    const { push } = useHistory()
+      
 
-    const dataURItoBlob = (dataURI) => {
+      const { push } = useHistory()
+
+      const dataURItoBlob = (dataURI) => {
         var byteString = atob(dataURI.split(',')[1]);
         var ab = new ArrayBuffer(byteString.length);
         var ia = new Uint8Array(ab);
@@ -35,7 +38,6 @@ function CreateNFT({wallet, isLoggedIn}) {
     const [description, setDescription] = useState('');
     const [market, setMarket] = useState('Sell');
     const [dataUri, setDataUri] = useState('')
-    const [storageUrl, setStorageUrl] = useState('')
     const [price, setPrice] = useState('')
 
     const onChange = (file) => {
@@ -57,10 +59,11 @@ function CreateNFT({wallet, isLoggedIn}) {
 
         e.preventDefault();
 
-        if(!isLoggedIn) {
-          window.alert("Please log in to mint NFT");
-          return;
-        }
+        // if(!isLoggedIn) {
+        //   window.alert("Please log in to mint NFT");
+        //   return;
+        // }
+         
         // var image = new File([''], "this.jpeg", {type: "image/*"});
         var image = dataURItoBlob(dataUri);
         // api key for nft.storage
@@ -68,12 +71,17 @@ function CreateNFT({wallet, isLoggedIn}) {
         const client = new NFTStorage({ token: apiKey })
         
         // price and sell/auction
-        const nft = { name, description, image };
+        const nft = { name, description, image, price };
         const metadata = await client.store(nft);
-        setStorageUrl(metadata.url);
+        window.alert("successfully stored");
 
-        const tokenURL = metadata.url;
-        // call smart contract
+        var storageUrl = 'https://ipfs.io/ipfs/' + metadata.url.slice(7);
+        // PRICE CAN BE DOUBLE, CHANGE IN CONTRACT
+        await mintNFT(name, storageUrl, price, market=='Sell'? true : false);
+        window.alert("successfully minted on blockchain");
+
+        push('/');
+        window.location.reload();
     }
 
     return (
@@ -129,8 +137,6 @@ function CreateNFT({wallet, isLoggedIn}) {
                   value={price}
                   onChange={(e) => setPrice(e.target.value)}
                   />
-                  
-                  <label>{storageUrl}</label>
 
                   <button>Mint NFT</button>
               </form>

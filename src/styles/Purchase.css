@@ -26,6 +26,7 @@
 
 
 .purchase__details{
+    width: 80%;
     padding-right: 24px;
     display: flex;
     flex-direction: column;
