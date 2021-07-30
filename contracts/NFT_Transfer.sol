@@ -118,6 +118,17 @@ contract NFT_Transfer is ERC721{
 
 
   event AuctionCreated(uint id, uint nftId);
+  event AuctionSuccessful(uint256 id, uint nftId);
+  event AuctionCancelled(uint256 id, uint nftId);
+  event BidCreated(
+    uint256 id, uint nftId, address bidder, uint256 bid
+  );
+  event AuctionNFTWithdrawal(
+    uint256 id, uint nftId, address withdrawer
+  );
+  event AuctionFundWithdrawal(
+    uint256 id, uint nftId, address withdrawer, uint256 amount
+  );
 
   function getAuctionsCount() public view returns (uint256) {
     return auctions.length;
@@ -178,10 +189,7 @@ contract NFT_Transfer is ERC721{
     // Require duration to be at least a minute and calculate block count
     require(_duration >= 60);
 
-    // TODO: duration count check
-    // uint256 durationBlockCount = _duration.div(uint256(14));
-    // TODO: NFT transfer to self
-    // nftContract.transferFrom(msg.sender, this, _tokenId);
+    uint256 durationBlockCount = _duration / uint256(14);
 
     totalAuctions++;
 
@@ -189,16 +197,12 @@ contract NFT_Transfer is ERC721{
     _auction.nft = _nft;
     _auction.seller = msg.sender;
     _auction.bidIncrement = uint128(_bidIncrement);
-    _auction.duration = _duration;
+    _auction.duration = durationBlockCount;
     _auction.startedAt = block.timestamp;
     _auction.startBlock = block.number;
     _auction.highestBid = 0;
     _auction.highestBidder = address(0);
     _auction.cancelled = false;
-
-
-    // Add auction index to nftToTokenIdToAuctionId mapping
-    // nftToTokenIdToAuctionId[_nftAddress][_tokenId] = totalAuctions;
 
     emit AuctionCreated(totalAuctions, _nft);
   }
@@ -223,9 +227,52 @@ contract NFT_Transfer is ERC721{
     auction.highestBidder = msg.sender;
     auction.fundsByBidder[auction.highestBidder] = newBid;
 
-    // TODO: emit event
     // Emit BidCreated event
-    // BidCreated(_auctionId, auction.nftAddress, auction.tokenId, msg.sender, newBid);
+    emit BidCreated(_auctionId, auction.nft, msg.sender, newBid);
+    return true;
+  }
+
+
+  // @dev Allow people to withdraw their balances or the NFT
+  function withdrawBalance(uint256 _auctionId) external returns (bool success) {
+    AuctionStatus _status = _getAuctionStatus(_auctionId);
+
+    Auction storage auction = auctions[_auctionId];
+    address fundsFrom;
+    uint withdrawalAmount;
+
+    // The seller gets receives highest bid when the auction is completed.
+    if (msg.sender == auction.seller) {
+      require(_status == AuctionStatus.Completed);
+      fundsFrom = auction.highestBidder;
+      withdrawalAmount = auction.highestBid;
+
+    }
+    // Highest bidder can only withdraw the NFT when the auction is completed.
+    // When the auction is cancelled, the highestBidder is set to address(0).
+    else if (msg.sender == auction.highestBidder) {
+      require(_status == AuctionStatus.Completed);
+      transferFrom(auction.seller, auction.highestBidder, auction.nft);
+      emit AuctionNFTWithdrawal(_auctionId, auction.nft, msg.sender);
+      return true;
+    }
+    // Anyone else gets what they bid
+    else {
+      fundsFrom = msg.sender;
+      withdrawalAmount = auction.fundsByBidder[fundsFrom];
+    }
+
+    require(withdrawalAmount > 0);
+    auction.fundsByBidder[fundsFrom] - withdrawalAmount;
+    _sendFunds(msg.sender, withdrawalAmount);
+
+    emit AuctionFundWithdrawal(
+      _auctionId,
+      auction.nft,
+      msg.sender,
+      withdrawalAmount
+    );
+
     return true;
   }
 
@@ -245,12 +292,8 @@ contract NFT_Transfer is ERC721{
     auction.cancelled = true;
     auction.highestBidder = address(0);
 
-    // TODO: NFT Transfer
-    // _removeAuction(auction.nftAddress, auction.tokenId);
-    // _transfer(auction.nftAddress, auction.seller, auction.tokenId);s
-
     // TODO: emit event
-    // AuctionCancelled(_auctionId, auction.nftAddress, auction.tokenId);
+    emit AuctionCancelled(_auctionId, auction.nft);
   }
 
 
