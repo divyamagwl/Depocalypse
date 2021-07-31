@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@material-ui/core": "^4.12.2",
     "@openzeppelin/contracts": "^4.2.0",
     "@portis/web3": "^4.0.5",
     "@testing-library/jest-dom": "^5.11.4",

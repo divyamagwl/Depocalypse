@@ -18,8 +18,8 @@ function App() {
   }, []);
 
   async function onLogin() {
-    portis.onLogin((wallet, email, reputation) => {
-      console.log(wallet, email, reputation);
+      portis.onLogin((wallet, email) => {
+      console.log(wallet, email);
       setWallet(wallet);
       setEmail(email);
     });
@@ -31,10 +31,17 @@ function App() {
     });
   }
 
+  // async function onWalletChange() {
+  //     portis.onActiveWalletChanged(walletAddress => {
+  //     setWallet(walletAddress);
+  //   })
+  // }
+
   async function showPortis() {
     await portis.showPortis();
     onLogin();
     checkLoggedIn();
+    // onWalletChange();
   }
 
   return (
