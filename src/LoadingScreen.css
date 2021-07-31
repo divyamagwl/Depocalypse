@@ -1,0 +1,13 @@
+.loadingscreen{
+    flex: 1;
+    align-self: center;
+}
+
+
+h1{
+    color: white;
+}
+
+.loadingscreen > .MuiCircularProgress-colorPrimary{
+    color: rgb(193, 81, 193);
+}
