@@ -1,18 +1,18 @@
 import React, { useState } from 'react'
 import '../styles/CreateNFT.css'
 
-import { NFTStorage, File } from 'nft.storage'
+import { NFTStorage } from 'nft.storage'
 
-import { Icon, InlineIcon } from '@iconify/react';
-import ethereumIcon from '@iconify-icons/mdi/ethereum';
+import { Icon } from '@iconify/react';
 import keyboardBackspace from '@iconify-icons/mdi/keyboard-backspace';
 import { useHistory } from 'react-router-dom'
-import { mintNFT } from "../services/web3";
+import { mintNFT, web3 } from "../services/web3";
+import { CircularProgress } from '@material-ui/core';
 
 function CreateNFT({wallet, isLoggedIn}) {
       
 
-      const { push } = useHistory()
+      const { push, goBack } = useHistory()
 
       const dataURItoBlob = (dataURI) => {
         var byteString = atob(dataURI.split(',')[1]);
@@ -39,6 +39,7 @@ function CreateNFT({wallet, isLoggedIn}) {
     const [market, setMarket] = useState('Sell');
     const [dataUri, setDataUri] = useState('')
     const [price, setPrice] = useState('')
+    const [isLoading, setIsLoading] = useState(false);
 
     const onChange = (file) => {
     
@@ -56,11 +57,14 @@ function CreateNFT({wallet, isLoggedIn}) {
     
 
     const handleSubmit = async (e) =>  {
+      try{
+        setIsLoading(true);
 
         e.preventDefault();
 
-        // if(!isLoggedIn) {
+        // if(){
         //   window.alert("Please log in to mint NFT");
+        //   setIsLoading(false);
         //   return;
         // }
          
@@ -70,24 +74,30 @@ function CreateNFT({wallet, isLoggedIn}) {
         const apiKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweDU4MTE5QzJENWQ1NEMwOEJmZWE2MjA1OWU3RjI4YjU2MGE5RUI2ZTUiLCJpc3MiOiJuZnQtc3RvcmFnZSIsImlhdCI6MTYyNjg5NjgzODI3NiwibmFtZSI6IkRlcG9jYWx5cHNlIn0.Lv5KWNAqcMI3aSkYg7Se396dsJ8miK586XuILazSg_M'
         const client = new NFTStorage({ token: apiKey })
         
+        const weiPrice = web3.utils.toWei(price);
         // price and sell/auction
-        const nft = { name, description, image, price };
+        const nft = { name, description, image, price:weiPrice };
         const metadata = await client.store(nft);
         window.alert("successfully stored");
 
-        var storageUrl = 'https://ipfs.io/ipfs/' + metadata.url.slice(7);
-        // PRICE CAN BE DOUBLE, CHANGE IN CONTRACT
-        await mintNFT(name, storageUrl, price, market=='Sell'? true : false);
-        window.alert("successfully minted on blockchain");
+        var storageUrl = metadata.url;
+        await mintNFT(name, storageUrl, weiPrice, market==='Sell'? true : false);
+        setIsLoading(false);
 
         push('/');
         window.location.reload();
+      }
+      catch{
+        window.alert('an error has occured, try again!');
+        setIsLoading(false);
+      }
+        
     }
 
     return (
         <div className="create">
             <div className="goback">
-                    <Icon icon={keyboardBackspace } onClick={() => push('/')} className='gobackButton'/> 
+                    <Icon icon={keyboardBackspace } onClick={goBack} className='gobackButton'/> 
             </div>
             <div className='poweredBy'>
                   <h3>Powered by NFT.Storage </h3>   
@@ -99,7 +109,7 @@ function CreateNFT({wallet, isLoggedIn}) {
             </div>
 
             <div className="create__details">
-              <h1>Mint a new NFT 🖌</h1>
+              <h1>Mint a new NFT 🖌 {isLoading &&  <CircularProgress />}</h1>
               <form onSubmit={handleSubmit}>
                   <label>Name</label>
                   <input 
@@ -138,7 +148,7 @@ function CreateNFT({wallet, isLoggedIn}) {
                   onChange={(e) => setPrice(e.target.value)}
                   />
 
-                  <button>Mint NFT</button>
+                  <button>Mint NFT </button>
               </form>
             </div>
         </div>

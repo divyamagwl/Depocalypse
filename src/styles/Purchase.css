@@ -86,6 +86,14 @@
     flex: 0.4;
 }
 
+.purchase__detailsBuy > button:disabled{
+    background: none;
+    border: 1px solid gray;
+    cursor: not-allowed;
+}
+
+
+
 .purchase__detailsBuy > .value > h2{
     font-size: 20px;
 }
