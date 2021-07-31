@@ -60,13 +60,7 @@ export const NFT_TransferAbi = [
             {
                 "indexed": true,
                 "internalType": "uint256",
-                "name": "propertyId",
-                "type": "uint256"
-            },
-            {
-                "indexed": true,
-                "internalType": "uint256",
-                "name": "bookingId",
+                "name": "nftId",
                 "type": "uint256"
             }
         ],
@@ -114,6 +108,64 @@ export const NFT_TransferAbi = [
     {
         "inputs": [
             {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "name": "NftCatalogue",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "id",
+                "type": "uint256"
+            },
+            {
+                "internalType": "string",
+                "name": "name",
+                "type": "string"
+            },
+            {
+                "internalType": "string",
+                "name": "minted_url",
+                "type": "string"
+            },
+            {
+                "internalType": "uint256",
+                "name": "price",
+                "type": "uint256"
+            },
+            {
+                "internalType": "bool",
+                "name": "onSale",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "name": "NftOwnership",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
                 "internalType": "address",
                 "name": "to",
                 "type": "address"
@@ -152,19 +204,6 @@ export const NFT_TransferAbi = [
         "inputs": [
             {
                 "internalType": "uint256",
-                "name": "_tokenId",
-                "type": "uint256"
-            }
-        ],
-        "name": "buyToken",
-        "outputs": [],
-        "stateMutability": "payable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "uint256",
                 "name": "_nftId",
                 "type": "uint256"
             }
@@ -195,7 +234,7 @@ export const NFT_TransferAbi = [
     },
     {
         "inputs": [],
-        "name": "getCount",
+        "name": "getNFTCount",
         "outputs": [
             {
                 "internalType": "uint256",
@@ -209,17 +248,43 @@ export const NFT_TransferAbi = [
     {
         "inputs": [
             {
-                "internalType": "address",
-                "name": "from",
-                "type": "address"
+                "internalType": "uint256",
+                "name": "_nftId",
+                "type": "uint256"
             }
         ],
+        "name": "getNFTPrice",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "getOnSaleTokens",
+        "outputs": [
+            {
+                "internalType": "uint256[]",
+                "name": "",
+                "type": "uint256[]"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
         "name": "getUserNfts",
         "outputs": [
             {
-                "internalType": "string[]",
+                "internalType": "uint256[]",
                 "name": "",
-                "type": "string[]"
+                "type": "uint256[]"
             }
         ],
         "stateMutability": "view",
@@ -411,6 +476,25 @@ export const NFT_TransferAbi = [
                 "internalType": "string",
                 "name": "",
                 "type": "string"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "name": "tokenBalance",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
             }
         ],
         "stateMutability": "view",
