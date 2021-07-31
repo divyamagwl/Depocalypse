@@ -1,0 +1,8 @@
+.nonftscreen{
+    flex: 1;
+    align-self: center;
+}
+
+h1, p{
+    color: white;
+}
