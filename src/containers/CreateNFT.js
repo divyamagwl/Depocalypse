@@ -81,7 +81,7 @@ function CreateNFT({wallet, isLoggedIn}) {
         window.alert("successfully stored");
 
         var storageUrl = metadata.url;
-        await mintNFT(name, storageUrl, weiPrice, market==='Sell'? true : false);
+        await mintNFT(name, storageUrl, weiPrice, market==='Sell'? true : false, market==='Auction'? true : false);
         setIsLoading(false);
 
         

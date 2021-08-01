@@ -1,0 +1,107 @@
+import React, { useEffect, useState } from 'react'
+import '../styles/Purchase.css'
+import { Icon } from '@iconify/react';
+import ethereumIcon from '@iconify-icons/mdi/ethereum';
+import keyboardBackspace from '@iconify-icons/mdi/keyboard-backspace';
+import { useHistory } from 'react-router-dom'
+import { getAccountAddress, ownerOf, tokenURI, web3, getHighestBid, bid } from '../services/web3';
+import axios from 'axios';
+
+function AuctionPurchase(props) {
+    const { goBack } = useHistory()
+    
+
+    const tokenID = props.match.params.tokenID;
+    const auctionID = props.match.params.auctionID;
+    const [data, setData] = useState({
+        name: '',
+        price: '',
+        image: '',
+        description: '',
+    });
+    const [isDisable, setIsDisable] = useState(true);
+    const [highestBid, setHighestBid] = useState(0);
+    const [yourBid, setYourBid] = useState(0)
+    // const [isLoading, setIsLoading] = useState('');
+
+    const dwebLink = (url) => {
+        var uri = url.slice(7); 
+        uri = uri.substring(0, uri.length - 5);
+        uri = 'https://' + uri + '.ipfs.dweb.link/blob';
+        return uri;
+    }
+
+    useEffect(() => {
+        const fetchData = async () => {
+            var url =  await tokenURI(tokenID);
+
+            url = url.slice(7); 
+            url = url.substring(0, url.length - 14);
+            url = 'https://' + url + '.ipfs.dweb.link/metadata.json';
+
+            const result = await axios(url);
+
+            setData(result.data);
+            const ownerAddr = await ownerOf(tokenID);
+            const userAddr = await getAccountAddress();
+            const disable = ownerAddr === userAddr;
+            setIsDisable(disable);
+
+            const _highestBid = await getHighestBid(auctionID);
+            console.log(_highestBid)
+            setHighestBid(_highestBid);
+        };
+       
+         fetchData();
+    },[tokenID, auctionID]);
+
+    const onPlaceBid = () => {
+        if(yourBid !== 0) {
+            bid(auctionID, web3.utils.toWei(yourBid));
+        }
+        else {
+            window.alert("Increase bid price");
+        }
+    }
+
+    return (
+
+            <div className='purchase'>
+               <div className="goback">
+                    <Icon icon={keyboardBackspace} onClick={goBack} className='gobackButton'/> 
+                </div> 
+                <div> 
+                
+                </div> 
+                <div className="purchase__artwork">
+                    {data.image && <img src={dwebLink(data.image)} alt="nft artwork" />}
+                </div>
+
+                <div className="purchase__details">
+                    <h1>#{tokenID} {data.name}</h1>
+                    <h3>{data.description}</h3>
+                    <div className="purchase__detailsBuy">
+                        <div className="value">
+                            <h2>IP: {web3.utils.fromWei((data.price).toString())}</h2>
+                            <Icon icon={ethereumIcon} style={{ color: 'white' }} className='symbol'/>
+                        </div>
+                        <button onClick={onPlaceBid} disabled={isDisable}>Bid</button>
+                    </div>
+                    <div>
+                        <h2>CP: {web3.utils.fromWei((highestBid).toString())}</h2>
+                        <label>Place your bid in ETH</label>
+                        <input 
+                        required
+                        type="number" 
+                        min="0.01"
+                        step="0.01" 
+                        value={yourBid}
+                        onChange={(e) => setYourBid(e.target.value)}
+                        />
+                    </div>
+                </div>
+            </div> 
+    )
+}
+
+export default AuctionPurchase

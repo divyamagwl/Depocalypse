@@ -1,92 +1,132 @@
 // SPDX-License-Identifier: MIT
-
 pragma solidity >=0.5.0 <0.9.0;
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 
-contract NFT_Transfer is ERC721{
+contract NFT_Transfer is ERC721URIStorage{
     // The NFT struct
     struct Nft {
+      uint id;
       string name;
       string minted_url;
       uint price;
       bool onSale;
+      bool onAuction;
+    }
+    
+    // An array of Nft storing Nft objects sequentially
+    Nft[] public NftCatalogue;
+    
+    function getNFTCount() public view returns(uint){
+        return NftCatalogue.length;
+    }
+    
+    function getNFTPrice(uint _nftId) public view returns(uint){
+        return NftCatalogue[_nftId].price;
     }
 
-    // An array of Nft storing Nft objects sequentially
-    Nft[] private NftCatalogue;
-    
     // mapping of NFT ID to NFT object
-    mapping(uint => address) private NftOwnership;
+    mapping(uint => address) public NftOwnership;
     // stores the balance of each user
-    mapping(address => uint) private tokenBalance;
-
+    mapping(address => uint) public tokenBalance;
+    
     constructor() ERC721("NFT-Marketplace", "Depocalypse") {}
+    
     // This event is emitted when a new property is put up for sale
     event MintNftEvent (
       uint indexed nftId
     );
 
-    // This event is emitted when a NewBooking is made
+    // This event is emitted when someone buy the nft
     event ConsensusNftEvent (
-      uint indexed propertyId,
-      uint indexed bookingId
+      uint indexed nftId
     );
   
-    function _mint(address to, uint256 nftId) internal override {
-        require(to != address(0), "ERC721: mint to the zero address");
-        require(!_exists(nftId), "ERC721: token already minted");
-        tokenBalance[to] += 1;
-        NftOwnership[nftId] = to;
-    }
-
-    function mintNFT(string memory _name, string memory _url, uint _price, bool _onSale) public returns(uint) {
-      NftCatalogue.push(Nft(_name,_url,_price,_onSale));
-      uint id = NftCatalogue.length - 1;
-      _mint(msg.sender,id);
-      // emit an event to notify the clients
+    // function to create erc721 token aka mint NFT
+    function mintNFT(string memory _name, string memory _url, uint _price, bool _onSale, bool _onAuction) public returns(uint) {
+      uint id = NftCatalogue.length;
+      NftCatalogue.push(Nft(id, _name,_url,_price,_onSale,_onAuction));
+      _safeMint(msg.sender,id);
+      _setTokenURI(id, _url);
+      tokenBalance[msg.sender] += 1;
       NftOwnership[id] = msg.sender;
+
+      if(_onAuction) {
+          uint auctionId = createAuction(id, 1000000000000000000, 100);
+          NftAuction[id] = auctionId;
+      }
+
       emit MintNftEvent(id);
       return id;
     }
 
+    // will be used for marketplace
+    function getOnSaleTokens() public view returns(uint[] memory) {
+        uint catalog_length = NftCatalogue.length;
+        uint[] memory onSaleTokenIds = new uint[](catalog_length + 1);
+        uint j = 0;
+        for (uint i = 0; i < catalog_length; i++) {
+            if (NftCatalogue[i].onSale == true) {
+                j = j + 1;
+                onSaleTokenIds[j] = NftCatalogue[i].id;
+            }
+            // first positon will give the size of sale token
+            onSaleTokenIds[0] = j;
+        }
+        
+        return onSaleTokenIds;
+    }
+    
+    // will be used for my gallery
+    function getUserNfts() public view returns (uint[] memory) {
+        address owner = msg.sender;
+        uint catalog_length = tokenBalance[owner];
+        uint[] memory userNfts = new uint[](catalog_length); 
+      
+        uint j = 0;
+        for(uint i = 0; i < NftCatalogue.length; i++) {
+            if(NftOwnership[i] == owner) {
+                userNfts[j] = i;
+                j = j + 1;
+            }
+        }
+        return userNfts;
+    }
+    
+    // function to buy NFT which are on sale
+    function consensusNft(uint _nftId) public payable {
+        // check if the function caller is not an zero account address
+        require(msg.sender != address(0), "incorrect address");
+        // check if the token id of the token being bought exists or not
+        require(_exists(_nftId), "this token doesn't exist");
+        // get the token's owner
+        address tokenOwner = ownerOf(_nftId);
+        // token's owner should not be an zero address account
+        require(tokenOwner != address(0));
+        // the one who wants to buy the token should not be the token's owner
+        require(tokenOwner != msg.sender, "you cannot buy your own token");
+        Nft memory nft = NftCatalogue[_nftId];
+        require(nft.onSale,
+        "Selected NFT not on sale");
+        require(msg.value >= nft.price, 
+        "Incorrect amount of funds transfered");
+         _sendFunds(NftOwnership[_nftId], msg.value);
+        transferFrom(NftOwnership[_nftId], msg.sender, _nftId);
+        emit ConsensusNftEvent(_nftId);
+    }
+    
     function transferFrom(address _from, address _to, uint256 _tokenId) public override
     {
       NftOwnership[_tokenId] = _to;
       tokenBalance[_from]--;
       tokenBalance[_to]++;
       NftCatalogue[_tokenId].onSale = false;
-      emit Transfer(_from, _to, _tokenId);
+      _transfer(_from, _to, _tokenId);
     }
 
-    function consensusNft(uint _nftId) public payable {
-      Nft memory nft = NftCatalogue[_nftId];
-      require(nft.onSale,
-        "Selected NFT not on sale");
-      require(msg.value == nft.price, 
-        "Incorrect amount of funds transfered");
-      transferFrom(NftOwnership[_nftId], msg.sender, _nftId);
-      _sendFunds(NftOwnership[_nftId], msg.value);
+    function _sendFunds (address beneficiary, uint value) internal{
+        address payable addr = payable(beneficiary);
+        addr.transfer(value);
     }
-
-    function _sendFunds (address beneficiary, uint value) internal {
-      payable(address(uint160(beneficiary))).transfer(value);
-    }
-
-    function getUserNfts () public view returns (string[] memory) {
-      address owner = msg.sender;
-      uint catalog_length = NftCatalogue.length;
-      string[] memory userNfts = new string[](catalog_length); 
-      uint j = 0;
-      for(uint i = 0; i < catalog_length; i++) {
-        if(NftOwnership[i] == owner) {
-          userNfts[j] = NftCatalogue[i].minted_url;
-          j = j + 1;
-          // userNfts.push(NftCatalogue[i].minted_url);
-        }
-      }
-      return userNfts;
-    }
-
 
 
   // Auction contract starts here
@@ -113,8 +153,10 @@ contract NFT_Transfer is ERC721{
 
   uint totalAuctions;
 
-  mapping (address => mapping(uint256 => uint256)) nftToTokenIdToAuctionId;
   Auction[] public auctions;
+
+  // mapping of NFT ID to Auction ID
+  mapping(uint => uint) public NftAuction;
 
 
   event AuctionCreated(uint id, uint nftId);
@@ -167,10 +209,18 @@ contract NFT_Transfer is ERC721{
 
   // @dev Return bid for given auction ID and bidder
   function getBid(uint256 _auctionId, address bidder)
-    external view returns (uint256 bid)
+    external view returns (uint256)
   {
     Auction storage auction = auctions[_auctionId];
     return auction.fundsByBidder[bidder];
+  }
+
+  // @dev Return highest bid for given auction ID
+  function getHighestBid(uint256 _auctionId)
+    external view returns (uint256)
+  {
+    Auction storage auction = auctions[_auctionId];
+    return auction.highestBid;
   }
 
 
@@ -181,7 +231,7 @@ contract NFT_Transfer is ERC721{
     uint256 _bidIncrement,
     uint256 _duration
   )
-    external
+    private returns (uint256)
   {
     // Require msg.sender to own nft
     require(NftOwnership[_nft] == msg.sender);
@@ -205,6 +255,8 @@ contract NFT_Transfer is ERC721{
     _auction.cancelled = false;
 
     emit AuctionCreated(totalAuctions, _nft);
+    
+    return totalAuctions-1;
   }
 
 
@@ -217,6 +269,8 @@ contract NFT_Transfer is ERC721{
     require(msg.value > 0);
 
     Auction storage auction = auctions[_auctionId];
+    uint nftPrice = getNFTPrice(auction.nft);
+    require(msg.value > nftPrice);
 
     // Require newBid be greater than or equal to highestBid + bidIncrement
     uint256 newBid = auction.fundsByBidder[msg.sender] + msg.value;
@@ -325,4 +379,21 @@ contract NFT_Transfer is ERC721{
     _;
   }
 
+  function getOnAuctionTokens() public view returns(uint[] memory) {
+    uint catalog_length = NftCatalogue.length;
+    uint[] memory onAuctionTokenIds = new uint[](catalog_length + 1);
+    uint j = 0;
+    for (uint i = 0; i < catalog_length; i++) {
+        if (NftCatalogue[i].onAuction == true) {
+            j = j + 1;
+            onAuctionTokenIds[j] = NftCatalogue[i].id;
+        }
+        // first positon will give the size of sale token
+        onAuctionTokenIds[0] = j;
+    }
+    
+    return onAuctionTokenIds;
+  }
+
+    
 }

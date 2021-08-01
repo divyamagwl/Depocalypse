@@ -11,7 +11,7 @@ export const portis = new Portis('9b58c894-cac3-4614-95ca-b5d94cac84b3', 'mainne
 // export const web3 = new Web3(portis.provider);
 export const web3 = new Web3(Web3.givenProvider);
 // change to the orignal deployed address
-const contractAddr = '0x1Ef0E62BE6A97FF850bCD11CAA22cbaCAafC23D7';
+const contractAddr = '0x7595E05f335fCF58632EAe3a9A3DDDE627Ea88fB';
 export const NFT_TransferContract = new web3.eth.Contract(NFT_TransferAbi, contractAddr);
 
 export const getNFTPrice = async (tokenID) => {
@@ -24,24 +24,12 @@ export const getNFTCount = async () => {
   return result;
 }
 
-export const mintNFT = async (name, url, price, onSale) => {
-    // this works for both, meta mask and portis
-    const accounts = await web3.eth.getAccounts((error, accounts) => {
-      console.log(accounts);
-    });
+export const mintNFT = async (name, url, price, onSale, onAuction) => {
+    const accounts = await web3.eth.getAccounts();
     const account = accounts[0];
-    // portis and metamask automatically calculates the gas
-    // const gas = await NFT_TransferContract.methods.mintNFT(name, url, price, onSale).estimateGas();
-    const result = await NFT_TransferContract.methods.mintNFT(name, url, price, onSale).send({
+    const result = await NFT_TransferContract.methods.mintNFT(name, url, price, onSale, onAuction).send({
         from: account,
-        // gas: gas,
-      })
-      // .on('confirmation', function(confirmationNumber, receipt){
-      //   window.alert('Successfully minted!')
-      // })
-      // .on('error', function(error, receipt) {
-      //   window.alert('an error has occured!')
-      // });
+    })
 
     console.log(result);
 }
@@ -52,9 +40,7 @@ export const getOnSaleTokens = async () => {
 }
 
 export const getUserNfts = async () => {
-  const accounts = await web3.eth.getAccounts((error, accounts) => {
-    console.log(accounts);
-  });
+  const accounts = await web3.eth.getAccounts();
   const account = accounts[0];
   const result = await NFT_TransferContract.methods.getUserNfts().call({
     from: account,
@@ -63,9 +49,7 @@ export const getUserNfts = async () => {
 }
 
 export const consensusNft = async(tokenId) => {
-  const accounts = await web3.eth.getAccounts((error, accounts) => {
-    console.log(accounts);
-  });
+  const accounts = await web3.eth.getAccounts();
   const account = accounts[0];
   const result = await NFT_TransferContract.methods.consensusNft(tokenId)
   .send({ 
@@ -113,5 +97,63 @@ export const getAccountBalance = async () => {
   const accounts = await web3.eth.getAccounts();
   var result = await web3.eth.getBalance(accounts[0]);
   result = web3.utils.fromWei(result);
+  return result;
+}
+
+// get all tokens currently on auction
+export const getOnAuctionTokens = async () => {
+  const result = await NFT_TransferContract.methods.getOnAuctionTokens().call();
+  return result;
+}
+
+// get the auctionID of tokenID
+export const getAuctionId = async (tokenID) => {
+  const result = await NFT_TransferContract.methods.NftAuction(tokenID).call();
+  return result;
+}
+
+export const bid = async(auctionID, yourBid) => {
+  const accounts = await web3.eth.getAccounts();
+  const account = accounts[0];
+  var result;
+  try {
+    result = await NFT_TransferContract.methods.bid(auctionID)
+    .send({ 
+      from: account, 
+      value: yourBid,
+    })
+    .on('transactionHash', function(hash){
+  
+    })
+    .on('receipt', function(receipt){
+    
+    })
+    .on('confirmation', function(confirmationNumber, receipt){
+      window.alert('successfully bid!')
+      window.location.reload();
+      console.log(result);
+    })
+    .on('error', function(error, receipt) {
+      console.log(error)
+      window.alert('an error has occured!')
+    });
+  }
+  catch (e) {}
+
+};
+
+
+// get the higgest bidder of auctionID
+export const getHighestBid = async (auctionID) => {
+  const result = await NFT_TransferContract.methods.getHighestBid(auctionID).call();
+  console.log(result)
+  return result;
+}
+
+// get the higgest bidder of auctionID
+export const getBid = async (auctionID) => {
+  const accounts = await web3.eth.getAccounts();
+  const result = await NFT_TransferContract.methods.getBid(auctionID, accounts[0]).call();
+  console.log(result)
   return result;
 }
