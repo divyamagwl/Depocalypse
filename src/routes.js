@@ -90,7 +90,7 @@ function BaseRouter({wallet, isLoggedIn}) {
           });
           setNfts(nft_array);
           setYourNfts(nft_array_2);
-          setTimeout(() => setIsLoading(false), 2000);
+          setTimeout(() => setIsLoading(false), 3000);
         };
         
         fetchData()
@@ -101,7 +101,7 @@ function BaseRouter({wallet, isLoggedIn}) {
     {isLoading && <LoadingScreen text={'Loading NFTs, please be Fungible!'}/> }
     {( !isLoading ) && 
     <Switch>
-      <Route exact path='/' render={() => ( nfts ? <Market nfts={nfts} /> : <NoNftScreen/> )}/>
+      <Route exact path='/' render={() => ( nfts.length > 0 ? <Market nfts={nfts} /> : <NoNftScreen/> )}/>
       <Route exact path='/create-nft' 
       render={() => (
         <CreateNFT 
@@ -109,7 +109,7 @@ function BaseRouter({wallet, isLoggedIn}) {
           isLoggedIn={isLoggedIn}
         />
       )}/>
-      <Route exact path='/your-gallery' render={() => ( yourNfts ? <Market nfts={yourNfts} /> : <NoNftScreen/> )}/>
+      <Route exact path='/your-gallery' render={() => ( yourNfts.length > 0 ? <Market nfts={yourNfts} /> : <NoNftScreen/> )}/>
       <Route path="/market/:tokenID" component={Purchase} />
     </Switch>}
   </div>)

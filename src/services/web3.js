@@ -2,16 +2,16 @@ import Portis from "@portis/web3";
 import Web3 from "web3";
 import { NFT_TransferAbi } from "./abi";
 
-const myPrivateEthereumNode = {
-  nodeUrl: 'http://127.0.0.1:7545',
-  chainId: 1377,
-};
+// const myPrivateEthereumNode = {
+//   nodeUrl: 'https://rpc-mumbai.matic.today',
+//   chainId: 80001,
+// };
 
-export const portis = new Portis('9b58c894-cac3-4614-95ca-b5d94cac84b3', myPrivateEthereumNode, { scope: ['email'] });
+export const portis = new Portis('9b58c894-cac3-4614-95ca-b5d94cac84b3', 'mainnet', { scope: ['email'] });
 // export const web3 = new Web3(portis.provider);
 export const web3 = new Web3(Web3.givenProvider);
 // change to the orignal deployed address
-const contractAddr = '0xD94902D39BC520fE0D5413472fCE417807cAbF88';
+const contractAddr = '0x1Ef0E62BE6A97FF850bCD11CAA22cbaCAafC23D7';
 export const NFT_TransferContract = new web3.eth.Contract(NFT_TransferAbi, contractAddr);
 
 export const getNFTPrice = async (tokenID) => {
