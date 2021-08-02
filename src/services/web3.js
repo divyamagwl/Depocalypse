@@ -11,7 +11,7 @@ export const portis = new Portis('9b58c894-cac3-4614-95ca-b5d94cac84b3', 'mainne
 // export const web3 = new Web3(portis.provider);
 export const web3 = new Web3(Web3.givenProvider);
 // change to the orignal deployed address
-const contractAddr = '0x7595E05f335fCF58632EAe3a9A3DDDE627Ea88fB';
+const contractAddr = '0xc31aaA16762aCa3C0D352dd9868376daD260C062';
 export const NFT_TransferContract = new web3.eth.Contract(NFT_TransferAbi, contractAddr);
 
 export const getNFTPrice = async (tokenID) => {
@@ -130,30 +130,51 @@ export const bid = async(auctionID, yourBid) => {
     })
     .on('confirmation', function(confirmationNumber, receipt){
       window.alert('successfully bid!')
-      window.location.reload();
-      console.log(result);
     })
     .on('error', function(error, receipt) {
       console.log(error)
       window.alert('an error has occured!')
     });
   }
-  catch (e) {}
-
+  catch (e) {
+    console.log(e);
+    return
+  }
+  window.location.reload();
+  console.log(result);
 };
 
 
 // get the higgest bidder of auctionID
 export const getHighestBid = async (auctionID) => {
   const result = await NFT_TransferContract.methods.getHighestBid(auctionID).call();
-  console.log(result)
   return result;
 }
 
-// get the higgest bidder of auctionID
+// get the bid of current account
 export const getBid = async (auctionID) => {
   const accounts = await web3.eth.getAccounts();
   const result = await NFT_TransferContract.methods.getBid(auctionID, accounts[0]).call();
-  console.log(result)
   return result;
+}
+
+export const getAuction = async (auctionID) => {
+  const result = await NFT_TransferContract.methods.getAuction(auctionID).call();
+  return result;
+}
+
+export const withdrawBalance = async (auctionID) => {
+  const accounts = await web3.eth.getAccounts();
+  const account = accounts[0];
+  try {
+    const result = await NFT_TransferContract.methods.withdrawBalance(auctionID).send({
+      from: account
+    });
+    console.log(result);
+    return result; 
+  }
+  catch (e) {
+    console.log(e.message);
+    return false;
+  }
 }

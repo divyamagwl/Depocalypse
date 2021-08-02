@@ -51,7 +51,7 @@ contract NFT_Transfer is ERC721URIStorage{
       NftOwnership[id] = msg.sender;
 
       if(_onAuction) {
-          uint auctionId = createAuction(id, 1000000000000000000, 100);
+          uint auctionId = createAuction(id, 1000000000000000000, 600);
           NftAuction[id] = auctionId;
       }
 
@@ -271,7 +271,7 @@ contract NFT_Transfer is ERC721URIStorage{
 
     // Require newBid be greater than or equal to highestBid + bidIncrement
     uint256 newBid = auction.fundsByBidder[msg.sender] + msg.value;
-    require(newBid > nftPrice);
+    require(newBid >= nftPrice);
     require(newBid >= auction.highestBid + auction.bidIncrement);
 
     // Update fundsByBidder mapping
@@ -295,15 +295,14 @@ contract NFT_Transfer is ERC721URIStorage{
 
     // The seller gets receives highest bid when the auction is completed.
     if (msg.sender == auction.seller) {
-      require(_status == AuctionStatus.Completed);
+      require(_status == AuctionStatus.Completed, "Please wait for the auction to complete");
       fundsFrom = auction.highestBidder;
       withdrawalAmount = auction.highestBid;
-
     }
     // Highest bidder can only withdraw the NFT when the auction is completed.
     // When the auction is cancelled, the highestBidder is set to address(0).
     else if (msg.sender == auction.highestBidder) {
-      require(_status == AuctionStatus.Completed);
+      require(_status == AuctionStatus.Completed, "You are the highest bidder and cannot withdraw your amount");
       transferFrom(auction.seller, auction.highestBidder, auction.nft);
       emit AuctionNFTWithdrawal(_auctionId, auction.nft, msg.sender);
       return true;
@@ -315,7 +314,7 @@ contract NFT_Transfer is ERC721URIStorage{
     }
 
     require(withdrawalAmount > 0);
-    auction.fundsByBidder[fundsFrom] - withdrawalAmount;
+    auction.fundsByBidder[fundsFrom] -= withdrawalAmount;
     _sendFunds(msg.sender, withdrawalAmount);
 
     emit AuctionFundWithdrawal(

@@ -86,7 +86,7 @@ function CreateNFT({wallet, isLoggedIn}) {
 
         
         window.location.reload();
-        push('/');
+        // push('/');
       }
       catch{
         window.alert('an error has occured, try again!');

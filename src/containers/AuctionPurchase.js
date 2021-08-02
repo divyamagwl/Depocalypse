@@ -4,8 +4,10 @@ import { Icon } from '@iconify/react';
 import ethereumIcon from '@iconify-icons/mdi/ethereum';
 import keyboardBackspace from '@iconify-icons/mdi/keyboard-backspace';
 import { useHistory } from 'react-router-dom'
-import { getAccountAddress, ownerOf, tokenURI, web3, getHighestBid, bid } from '../services/web3';
+import { getAccountAddress, tokenURI, web3, bid, getAuction, getBid, withdrawBalance } from '../services/web3';
 import axios from 'axios';
+
+// TODO: Add a loader because second useEffect takes some time
 
 function AuctionPurchase(props) {
     const { goBack } = useHistory()
@@ -20,9 +22,21 @@ function AuctionPurchase(props) {
         description: '',
     });
     const [isDisable, setIsDisable] = useState(true);
-    const [highestBid, setHighestBid] = useState(0);
-    const [yourBid, setYourBid] = useState(0)
-    // const [isLoading, setIsLoading] = useState('');
+    const [inputBid, setInputBid] = useState(0);
+    const [yourBid, setYourBid] = useState(0);
+    const [auctionDetails, setAuctionDetails] = useState({
+        id: '',
+        nft: '',
+        seller: '',
+        bidIncrement: '',
+        duration: '',
+        startedAt: '',
+        startBlock: '',
+        status: '',
+        highestBid: '',
+        highestBidder: '',
+    })
+    const [auctionCompleted, setAuctionCompleted] = useState(false);
 
     const dwebLink = (url) => {
         var uri = url.slice(7); 
@@ -31,41 +45,82 @@ function AuctionPurchase(props) {
         return uri;
     }
 
+
     useEffect(() => {
         const fetchData = async () => {
             var url =  await tokenURI(tokenID);
-
+    
             url = url.slice(7); 
             url = url.substring(0, url.length - 14);
             url = 'https://' + url + '.ipfs.dweb.link/metadata.json';
-
+    
             const result = await axios(url);
-
+    
             setData(result.data);
-            const ownerAddr = await ownerOf(tokenID);
+
+            const _auctionDetails = await getAuction(auctionID);
+            setAuctionDetails(_auctionDetails);
+
+            const _yourBid = await getBid(auctionID);
+            setYourBid(_yourBid);
+
+            const ownerAddr = _auctionDetails.seller;
             const userAddr = await getAccountAddress();
+            console.log(ownerAddr, userAddr)
             const disable = ownerAddr === userAddr;
             setIsDisable(disable);
-
-            const _highestBid = await getHighestBid(auctionID);
-            console.log(_highestBid)
-            setHighestBid(_highestBid);
+        
         };
-       
-         fetchData();
+
+        fetchData();
     },[tokenID, auctionID]);
 
+    
+    useEffect(() => {
+        if(auctionDetails.startedAt === "") { 
+            return
+        }
+        let interval
+        if(!auctionCompleted) {
+            interval = setInterval(() => {
+                const now = Math.floor((Date.now()) / 1000); // UNIX time in sec
+                const startedAt = parseInt(auctionDetails.startedAt);
+                const duration = parseInt(auctionDetails.duration);
+                const auctionEndTime = startedAt + duration
+                console.log( now, auctionEndTime );
+    
+                if(auctionEndTime < now) {
+                    console.log("Auction completed")
+                    setAuctionCompleted(true)
+                }
+            }, 10000);
+        }
+        else {
+            clearInterval(interval);
+        }
+        return () => clearInterval(interval);
+    }, [auctionCompleted, auctionDetails]) 
+
     const onPlaceBid = () => {
-        if(yourBid !== 0) {
-            bid(auctionID, web3.utils.toWei(yourBid));
+        if(inputBid !== 0) {
+            bid(auctionID, web3.utils.toWei(inputBid));
         }
         else {
             window.alert("Increase bid price");
         }
     }
 
-    return (
+    const withdraw = async () => {
+        const result = await withdrawBalance(auctionID);
+        console.log(result)
+        if (result) {
+            window.alert("Transaction is successful");
+            window.location.reload();
+        }
+    }
 
+    return (
+            
             <div className='purchase'>
                <div className="goback">
                     <Icon icon={keyboardBackspace} onClick={goBack} className='gobackButton'/> 
@@ -82,21 +137,38 @@ function AuctionPurchase(props) {
                     <h3>{data.description}</h3>
                     <div className="purchase__detailsBuy">
                         <div className="value">
-                            <h2>IP: {web3.utils.fromWei((data.price).toString())}</h2>
+                            <h2>Initial: {web3.utils.fromWei((data.price).toString())}</h2>
                             <Icon icon={ethereumIcon} style={{ color: 'white' }} className='symbol'/>
                         </div>
-                        <button onClick={onPlaceBid} disabled={isDisable}>Bid</button>
+                        {/* These might not be working properly */}
+                        {
+                            (!auctionCompleted) &&
+                            <button onClick={onPlaceBid} disabled={isDisable}>Bid</button>
+                        }
+                        {
+                            (!isDisable) && (auctionDetails.highestBid !== yourBid) &&
+                            <button onClick={withdraw}>Withdraw balance</button>
+                        }
+                        {
+                            (auctionDetails.highestBid === yourBid) && (auctionCompleted) &&
+                            <button onClick={withdraw}>Claim your NFT</button>
+                        }
+                        {
+                            (isDisable) && (auctionCompleted) &&
+                            <button onClick={withdraw}>Claim your money</button>
+                        }
                     </div>
                     <div>
-                        <h2>CP: {web3.utils.fromWei((highestBid).toString())}</h2>
-                        <label>Place your bid in ETH</label>
+                        <h2>HighestBid: {web3.utils.fromWei((auctionDetails.highestBid).toString())}</h2> 
+                        <h2>YourBid: {web3.utils.fromWei((yourBid).toString())}</h2> 
+                        <label>Increase your bid by</label>
                         <input 
                         required
                         type="number" 
                         min="0.01"
                         step="0.01" 
-                        value={yourBid}
-                        onChange={(e) => setYourBid(e.target.value)}
+                        value={inputBid}
+                        onChange={(e) => setInputBid(e.target.value)}
                         />
                     </div>
                 </div>
