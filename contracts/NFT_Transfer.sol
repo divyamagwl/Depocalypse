@@ -239,22 +239,20 @@ contract NFT_Transfer is ERC721URIStorage{
     // Require duration to be at least a minute and calculate block count
     require(_duration >= 60);
 
-    uint256 durationBlockCount = _duration / uint256(14);
-
     totalAuctions++;
 
     Auction storage _auction = auctions.push();
     _auction.nft = _nft;
     _auction.seller = msg.sender;
     _auction.bidIncrement = uint128(_bidIncrement);
-    _auction.duration = durationBlockCount;
+    _auction.duration = _duration;
     _auction.startedAt = block.timestamp;
     _auction.startBlock = block.number;
     _auction.highestBid = 0;
     _auction.highestBidder = address(0);
     _auction.cancelled = false;
 
-    emit AuctionCreated(totalAuctions, _nft);
+    emit AuctionCreated(totalAuctions-1, _nft);
     
     return totalAuctions-1;
   }
@@ -270,10 +268,10 @@ contract NFT_Transfer is ERC721URIStorage{
 
     Auction storage auction = auctions[_auctionId];
     uint nftPrice = getNFTPrice(auction.nft);
-    require(msg.value > nftPrice);
 
     // Require newBid be greater than or equal to highestBid + bidIncrement
     uint256 newBid = auction.fundsByBidder[msg.sender] + msg.value;
+    require(newBid > nftPrice);
     require(newBid >= auction.highestBid + auction.bidIncrement);
 
     // Update fundsByBidder mapping
@@ -346,7 +344,6 @@ contract NFT_Transfer is ERC721URIStorage{
     auction.cancelled = true;
     auction.highestBidder = address(0);
 
-    // TODO: emit event
     emit AuctionCancelled(_auctionId, auction.nft);
   }
 
@@ -359,7 +356,7 @@ contract NFT_Transfer is ERC721URIStorage{
     if (auction.cancelled) {
       return AuctionStatus.Cancelled;
     }
-    else if (auction.startBlock + auction.duration < block.number) {
+    else if (auction.startedAt + auction.duration < block.timestamp) {
       return AuctionStatus.Completed;
     }
     else {
