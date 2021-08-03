@@ -37,6 +37,7 @@ function AuctionPurchase(props) {
         highestBidder: '',
     })
     const [auctionCompleted, setAuctionCompleted] = useState(false);
+    const [auctionEndTime, setAuctionEndTime] = useState(0);
 
     const dwebLink = (url) => {
         var uri = url.slice(7); 
@@ -44,8 +45,15 @@ function AuctionPurchase(props) {
         uri = 'https://' + uri + '.ipfs.dweb.link/blob';
         return uri;
     }
-
-
+  
+    const auctionEndTimeHumanDate = (unixAuctionEndTime) => {
+        const unixTimestamp = unixAuctionEndTime
+        const milliseconds = unixTimestamp * 1000      
+        const dateObject = new Date(milliseconds)
+        const humanDateFormat = dateObject.toLocaleString()
+        return humanDateFormat;
+    }
+  
     useEffect(() => {
         const fetchData = async () => {
             var url =  await tokenURI(tokenID);
@@ -66,7 +74,6 @@ function AuctionPurchase(props) {
 
             const ownerAddr = _auctionDetails.seller;
             const userAddr = await getAccountAddress();
-            console.log(ownerAddr, userAddr)
             const disable = ownerAddr === userAddr;
             setIsDisable(disable);
         
@@ -86,10 +93,11 @@ function AuctionPurchase(props) {
                 const now = Math.floor((Date.now()) / 1000); // UNIX time in sec
                 const startedAt = parseInt(auctionDetails.startedAt);
                 const duration = parseInt(auctionDetails.duration);
-                const auctionEndTime = startedAt + duration
-                console.log( now, auctionEndTime );
+                const unixAuctionEndTime = startedAt + duration
+                console.log( now, unixAuctionEndTime );
+                setAuctionEndTime(auctionEndTimeHumanDate(unixAuctionEndTime));
     
-                if(auctionEndTime < now) {
+                if(unixAuctionEndTime < now) {
                     console.log("Auction completed")
                     setAuctionCompleted(true)
                 }
@@ -170,6 +178,7 @@ function AuctionPurchase(props) {
                         value={inputBid}
                         onChange={(e) => setInputBid(e.target.value)}
                         />
+                        <h2>Auction will end on: {auctionEndTime}</h2>
                     </div>
                 </div>
             </div> 
