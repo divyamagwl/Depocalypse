@@ -53,6 +53,20 @@ function AuctionPurchase(props) {
         const humanDateFormat = dateObject.toLocaleString()
         return humanDateFormat;
     }
+
+    const checkAuctionEnd = (_auctionDetails) => {
+        const now = Math.floor((Date.now()) / 1000); // UNIX time in sec
+        const startedAt = parseInt(_auctionDetails.startedAt);
+        const duration = parseInt(_auctionDetails.duration);
+        const unixAuctionEndTime = startedAt + duration
+        console.log( now, unixAuctionEndTime );
+        setAuctionEndTime(auctionEndTimeHumanDate(unixAuctionEndTime));
+
+        if(unixAuctionEndTime < now) {
+            console.log("Auction completed")
+            setAuctionCompleted(true)
+        }
+    }
   
     useEffect(() => {
         const fetchData = async () => {
@@ -76,7 +90,8 @@ function AuctionPurchase(props) {
             const userAddr = await getAccountAddress();
             const disable = ownerAddr === userAddr;
             setIsDisable(disable);
-        
+
+            checkAuctionEnd(_auctionDetails);
         };
 
         fetchData();
@@ -90,18 +105,8 @@ function AuctionPurchase(props) {
         let interval
         if(!auctionCompleted) {
             interval = setInterval(() => {
-                const now = Math.floor((Date.now()) / 1000); // UNIX time in sec
-                const startedAt = parseInt(auctionDetails.startedAt);
-                const duration = parseInt(auctionDetails.duration);
-                const unixAuctionEndTime = startedAt + duration
-                console.log( now, unixAuctionEndTime );
-                setAuctionEndTime(auctionEndTimeHumanDate(unixAuctionEndTime));
-    
-                if(unixAuctionEndTime < now) {
-                    console.log("Auction completed")
-                    setAuctionCompleted(true)
-                }
-            }, 10000);
+                checkAuctionEnd(auctionDetails);
+            }, 1000);
         }
         else {
             clearInterval(interval);
@@ -157,7 +162,8 @@ function AuctionPurchase(props) {
                             <button onClick={onPlaceBid} disabled={isDisable}>Bid</button>
                         }
                         {
-                            (!isDisable) && (auctionDetails.highestBid !== yourBid) &&
+                            // eslint-disable-next-line
+                            (!isDisable) && (auctionDetails.highestBid !== yourBid) && (yourBid != 0) &&
                             <button onClick={withdraw}>Withdraw balance</button>
                         }
                         {
