@@ -15,6 +15,7 @@ function AuctionPurchase(props) {
 
     const tokenID = props.match.params.tokenID;
     const auctionID = props.match.params.auctionID;
+    const [account, setAccount] = useState('');
     const [data, setData] = useState({
         name: '',
         price: '',
@@ -92,6 +93,9 @@ function AuctionPurchase(props) {
             setIsDisable(disable);
 
             checkAuctionEnd(_auctionDetails);
+
+            const accounts = await web3.eth.getAccounts();
+            setAccount(accounts[0]);
         };
 
         fetchData();
@@ -167,7 +171,7 @@ function AuctionPurchase(props) {
                             <button onClick={withdraw}>Withdraw balance</button>
                         }
                         {
-                            (auctionDetails.highestBid === yourBid) && (auctionCompleted) &&
+                            (auctionDetails.highestBidder === account) && (auctionCompleted) &&
                             <button onClick={withdraw}>Claim your NFT</button>
                         }
                         {
@@ -178,7 +182,11 @@ function AuctionPurchase(props) {
                     <div className="purchase__auctionDetails">
                         <div className="purchase__auctionDetails__Bids">
                             <h2>Highest Bid: {web3.utils.fromWei((auctionDetails.highestBid).toString())}</h2> 
-                            <h2>Your Bid: {web3.utils.fromWei((yourBid).toString())}</h2> 
+                            {
+                                (auctionDetails.highestBidder === account) && (auctionCompleted) ?
+                                <h2>Your Bid: {web3.utils.fromWei((auctionDetails.highestBid).toString())}</h2> :
+                                <h2>Your Bid: {web3.utils.fromWei((yourBid).toString())}</h2> 
+                            }
                         </div>
                         {(!auctionCompleted) &&
                         <label>Increase your bid by</label>}
