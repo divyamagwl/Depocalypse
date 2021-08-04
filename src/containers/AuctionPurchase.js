@@ -82,7 +82,7 @@ function AuctionPurchase(props) {
         fetchData();
     },[tokenID, auctionID]);
 
-    
+    // 2nd use effect
     useEffect(() => {
         if(auctionDetails.startedAt === "") { 
             return
@@ -130,11 +130,14 @@ function AuctionPurchase(props) {
     return (
             
             <div className='purchase'>
-               <div className="goback">
+            <div className="goback">
                     <Icon icon={keyboardBackspace} onClick={goBack} className='gobackButton'/> 
                 </div> 
-                <div> 
-                
+                <div className='purchase__header'> 
+                    <h2>Auction will end on: </h2>
+                    {!auctionCompleted && <h3>{auctionEndTime}</h3>}
+                    {auctionCompleted && <h3>Ended</h3>}
+                    
                 </div> 
                 <div className="purchase__artwork">
                     {data.image && <img src={dwebLink(data.image)} alt="nft artwork" />}
@@ -166,10 +169,14 @@ function AuctionPurchase(props) {
                             <button onClick={withdraw}>Claim your money</button>
                         }
                     </div>
-                    <div>
-                        <h2>HighestBid: {web3.utils.fromWei((auctionDetails.highestBid).toString())}</h2> 
-                        <h2>YourBid: {web3.utils.fromWei((yourBid).toString())}</h2> 
-                        <label>Increase your bid by</label>
+                    <div className="purchase__auctionDetails">
+                        <div className="purchase__auctionDetails__Bids">
+                            <h2>Highest Bid: {web3.utils.fromWei((auctionDetails.highestBid).toString())}</h2> 
+                            <h2>Your Bid: {web3.utils.fromWei((yourBid).toString())}</h2> 
+                        </div>
+                        {(!auctionCompleted) &&
+                        <label>Increase your bid by</label>}
+                        {(!auctionCompleted) &&
                         <input 
                         required
                         type="number" 
@@ -177,8 +184,7 @@ function AuctionPurchase(props) {
                         step="0.01" 
                         value={inputBid}
                         onChange={(e) => setInputBid(e.target.value)}
-                        />
-                        <h2>Auction will end on: {auctionEndTime}</h2>
+                        />}
                     </div>
                 </div>
             </div> 
