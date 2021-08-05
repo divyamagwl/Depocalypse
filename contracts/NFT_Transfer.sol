@@ -421,27 +421,6 @@ contract NFT_Transfer is ERC721URIStorage {
         return totalAuctions-1;
     }
 
-
-    function getDutchAuctionPrice(uint _auctionId) public view returns(uint) {
-
-        Auction storage auction = auctions[_auctionId];
-        require(auction.auctionType == AuctionType.Dutch, "This is not a dutch type of auction");
-        DutchAuction storage _dutchAuction = dutchAuctions[auction.auctionTypeId];
-        uint nftPrice = getNFTPrice(auction.nft);
-
-        AuctionStatus _status = _getAuctionStatus(_auctionId);
-        uint endingPrice = _dutchAuction.endingPrice;
-        if (_status == AuctionStatus.Completed) {
-            return endingPrice;
-        }
-        // uint diffTime = (block.timestamp - auction.startedAt); // Difference in time in minutes
-        uint price = nftPrice - (1000 * _dutchAuction.decrementPrice);
-        if (price <= endingPrice) {
-            return endingPrice;
-        }
-        return price;
-    }
-
     function consensusDutchAuction(uint _auctionId) public payable {
 
         Auction storage auction = auctions[_auctionId];
@@ -457,12 +436,12 @@ contract NFT_Transfer is ERC721URIStorage {
         require(tokenOwner != msg.sender, "you cannot buy your own token");
         Nft memory nft = NftCatalogue[_nftId];
         require(nft.onAuction, "Selected NFT not on auction");
-        uint price = getDutchAuctionPrice(_auctionId);
-        require(msg.value >= price, "Incorrect amount of funds transfered");
         _sendFunds(NftOwnership[_nftId], msg.value);
         transferFrom(NftOwnership[_nftId], msg.sender, _nftId);
         
         _dutchAuction.completed = true;
+        nft.price = msg.value;
+        
         emit ConsensusNftEvent(_nftId);
     }
     
@@ -665,5 +644,27 @@ contract NFT_Transfer is ERC721URIStorage {
 
         emit AuctionCancelled(_auctionId, auction.nft);
     }
+    
+    
+    // Wasn't working properly so created same funtionality instead in Javascript
+    // function getDutchAuctionPrice(uint _auctionId) public view returns(uint) {
+
+    //     Auction storage auction = auctions[_auctionId];
+    //     require(auction.auctionType == AuctionType.Dutch, "This is not a dutch type of auction");
+    //     DutchAuction storage _dutchAuction = dutchAuctions[auction.auctionTypeId];
+    //     uint nftPrice = getNFTPrice(auction.nft);
+
+    //     AuctionStatus _status = _getAuctionStatus(_auctionId);
+    //     uint endingPrice = _dutchAuction.endingPrice;
+    //     if (_status == AuctionStatus.Completed) {
+    //         return endingPrice;
+    //     }
+    //     uint diffTime = (block.timestamp - auction.startedAt) / 60; // Difference in time in minutes
+    //     uint price = nftPrice - (diffTime * _dutchAuction.decrementPrice);
+    //     if (price <= endingPrice) {
+    //         return endingPrice;
+    //     }
+    //     return price;
+    // }
 
 }

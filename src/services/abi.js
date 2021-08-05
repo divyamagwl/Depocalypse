@@ -964,25 +964,6 @@ export const NFT_TransferAbi =
 				"type": "uint256"
 			}
 		],
-		"name": "getDutchAuctionPrice",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "_auctionId",
-				"type": "uint256"
-			}
-		],
 		"name": "getHighestBid",
 		"outputs": [
 			{

@@ -15,7 +15,7 @@ export const portis = new Portis(
 // export const web3 = new Web3(portis.provider);
 export const web3 = new Web3(Web3.givenProvider);
 // change to the orignal deployed address
-const contractAddr = "0x4F89b9B21774d6ECE577Fc99650fAE2d4fdBbC14";
+const contractAddr = "0x14043c8242DDaEe647849C560C39FBf6eD551C74";
 export const NFT_TransferContract = new web3.eth.Contract(
   NFT_TransferAbi,
   contractAddr
@@ -199,20 +199,31 @@ export const withdrawBalance = async (auctionID) => {
 //# Dutch Auction 
 //#################################################################
 
-export const getDutchAuctionPrice = async (auctionID) => {
-  try {
-    const result = await NFT_TransferContract.methods
-    .getDutchAuctionPrice(auctionID)
-    .call();
-    console.log(result);
-    return result;
-  }
-  catch (e) { console.log(e); }
-};
-
 export const getDutchAuction = async (auctionID) => {
   const result = await NFT_TransferContract.methods
     .getDutchAuction(auctionID)
     .call();
   return result;
+};
+
+export const consensusDutchAuction = async (auctionID, price) => {
+  const accounts = await web3.eth.getAccounts();
+  const account = accounts[0];
+  const result = await NFT_TransferContract.methods
+    .consensusDutchAuction(auctionID)
+    .send({
+      from: account,
+      value: price,
+    })
+    .on("transactionHash", function (hash) {})
+    .on("receipt", function (receipt) {})
+    .on("confirmation", function (confirmationNumber, receipt) {
+      window.alert("Your purchase is successful!");
+    })
+    .on("error", function (error, receipt) {
+      window.alert("An error has occured!");
+    });
+
+  window.location.reload();
+  console.log(result);
 };

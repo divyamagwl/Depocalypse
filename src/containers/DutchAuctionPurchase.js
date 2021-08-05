@@ -4,15 +4,31 @@ import { Icon } from '@iconify/react';
 import ethereumIcon from '@iconify-icons/mdi/ethereum';
 import keyboardBackspace from '@iconify-icons/mdi/keyboard-backspace';
 import { useHistory } from 'react-router-dom'
-import { getAccountAddress, tokenURI, web3, bid, getDutchAuction, getBid, withdrawBalance, getDutchAuctionPrice } from '../services/web3';
+import { getAccountAddress, tokenURI, web3, getDutchAuction, consensusDutchAuction } from '../services/web3';
 import axios from 'axios';
 
 function DutchAuctionPurchase(props) {
+
+    const getDutchAuctionPrice = async (_auctionDetails, _data, _auctionCompleted) => {
+
+        const nftPrice = _data.price;
+        const endingPrice = _auctionDetails.endingPrice;
+        if (_auctionCompleted) {
+            return endingPrice;
+        }
+        const now = Math.floor((Date.now()) / 1000); // UNIX time in sec
+        const diffTime = Math.round((now - _auctionDetails.startedAt) / 60); // Difference in time in minutes
+        const price = nftPrice - (diffTime * _auctionDetails.decrementPrice);
+        if (price <= endingPrice) {
+            return endingPrice;
+        }
+        return price;
+    }
+
     const { goBack } = useHistory()
     
     const tokenID = props.match.params.tokenID;
     const auctionID = props.match.params.auctionID;
-    const [account, setAccount] = useState('');
     const [data, setData] = useState({
         name: '',
         price: '',
@@ -20,7 +36,6 @@ function DutchAuctionPurchase(props) {
         description: '',
     });
     const [isDisable, setIsDisable] = useState(true);
-    const [inputBid, setInputBid] = useState(0);
     const [auctionDetails, setAuctionDetails] = useState({
         id: '',
         nft: '',
@@ -35,7 +50,7 @@ function DutchAuctionPurchase(props) {
     })
     const [auctionCompleted, setAuctionCompleted] = useState(false);
     const [auctionEndTime, setAuctionEndTime] = useState(0);
-    const [currentPrice, setCurrentPrice] = useState('0');
+    const [currentPrice, setCurrentPrice] = useState(0);
 
     const dwebLink = (url) => {
         var uri = url.slice(7); 
@@ -52,17 +67,16 @@ function DutchAuctionPurchase(props) {
         return humanDateFormat;
     }
 
-    const checkAuctionEnd = async (_auctionDetails) => {
+    const checkAuctionEnd = async (_auctionDetails, _data) => {
         const now = Math.floor((Date.now()) / 1000); // UNIX time in sec
         const startedAt = parseInt(_auctionDetails.startedAt);
         const duration = parseInt(_auctionDetails.duration);
         const unixAuctionEndTime = startedAt + duration
-        // console.log( now, unixAuctionEndTime );
+        console.log( now, _auctionDetails.startedAt );
         setAuctionEndTime(auctionEndTimeHumanDate(unixAuctionEndTime));
 
-        const result = await getDutchAuctionPrice(auctionID);
+        const result = await getDutchAuctionPrice(_auctionDetails, _data, auctionCompleted);
         setCurrentPrice(result);
-        // console.log(result)
 
         if(unixAuctionEndTime < now) {
             console.log("Auction completed")
@@ -90,10 +104,13 @@ function DutchAuctionPurchase(props) {
             const disable = ownerAddr === userAddr;
             setIsDisable(disable);
 
-            await checkAuctionEnd(_auctionDetails);
-
-            const accounts = await web3.eth.getAccounts();
-            setAccount(accounts[0]);
+            if(_auctionDetails.completed) {
+                setCurrentPrice(result.data.price);
+                setAuctionCompleted(true);
+            }
+            else {
+                await checkAuctionEnd(_auctionDetails, result.data);
+            }
         };
 
         fetchData();
@@ -104,11 +121,15 @@ function DutchAuctionPurchase(props) {
         if(auctionDetails.startedAt === "") { 
             return
         }
+        if(auctionDetails.completed) {
+            setCurrentPrice(data.price);
+            setAuctionCompleted(true);
+        }
         let interval
         if(!auctionCompleted) {
             interval = setInterval(async () => {
-                await checkAuctionEnd(auctionDetails);
-            }, 1000);
+                await checkAuctionEnd(auctionDetails, data);
+            }, 10000);
         }
         else {
             clearInterval(interval);
@@ -116,22 +137,8 @@ function DutchAuctionPurchase(props) {
         return () => clearInterval(interval);
     }, [auctionCompleted, auctionDetails]) 
 
-    const onPlaceBid = () => {
-        if(inputBid !== 0) {
-            bid(auctionID, web3.utils.toWei(inputBid));
-        }
-        else {
-            window.alert("Increase bid price");
-        }
-    }
-
-    const withdraw = async () => {
-        const result = await withdrawBalance(auctionID);
-        console.log(result)
-        if (result) {
-            window.alert("Transaction is successful");
-            window.location.reload();
-        }
+    const buyNFT = async () => {
+        await consensusDutchAuction(auctionID, currentPrice);
     }
 
     return (
@@ -159,25 +166,14 @@ function DutchAuctionPurchase(props) {
                             <Icon icon={ethereumIcon} style={{ color: 'white' }} className='symbol'/>
                         </div>
                         {
-                            (!auctionCompleted) &&
-                            <button onClick={onPlaceBid} disabled={isDisable}>Bid</button>
+                            (!auctionCompleted) && !auctionDetails.completed &&
+                            <button onClick={buyNFT} disabled={isDisable}>Buy now</button>
                         }
                     </div>
                     <div className="purchase__auctionDetails">
                         <div className="purchase__auctionDetails__Bids">
-                            <h2>Current Price: {currentPrice}</h2> 
+                            <h2>Current Price: {web3.utils.fromWei(currentPrice.toString())}</h2> 
                         </div>
-                        {(!auctionCompleted) &&
-                        <label>Increase your bid by</label>}
-                        {(!auctionCompleted) &&
-                        <input 
-                        required
-                        type="number" 
-                        min="0.01"
-                        step="0.01" 
-                        value={inputBid}
-                        onChange={(e) => setInputBid(e.target.value)}
-                        />}
                     </div>
                 </div>
             </div> 

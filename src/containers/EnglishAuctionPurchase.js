@@ -86,13 +86,12 @@ function EnglishAuctionPurchase(props) {
 
             const ownerAddr = _auctionDetails.seller;
             const userAddr = await getAccountAddress();
+            setAccount(userAddr);
             const disable = ownerAddr === userAddr;
             setIsDisable(disable);
 
             checkAuctionEnd(_auctionDetails);
 
-            const accounts = await web3.eth.getAccounts();
-            setAccount(accounts[0]);
         };
 
         fetchData();
@@ -107,7 +106,7 @@ function EnglishAuctionPurchase(props) {
         if(!auctionCompleted) {
             interval = setInterval(() => {
                 checkAuctionEnd(auctionDetails);
-            }, 1000);
+            }, 10000);
         }
         else {
             clearInterval(interval);
@@ -186,8 +185,9 @@ function EnglishAuctionPurchase(props) {
                             }
                         </div>
                         {(!auctionCompleted) &&
-                        <label>Increase your bid by</label>}
-                        {(!auctionCompleted) &&
+                        <React.Fragment>
+                        <h2>Minimum Bid Increment: {web3.utils.fromWei((auctionDetails.bidIncrement).toString())}</h2>
+                        <label>Increase your bid by</label>
                         <input 
                         required
                         type="number" 
@@ -195,7 +195,9 @@ function EnglishAuctionPurchase(props) {
                         step="0.01" 
                         value={inputBid}
                         onChange={(e) => setInputBid(e.target.value)}
-                        />}
+                        />
+                        </React.Fragment>
+                        }
                     </div>
                 </div>
             </div> 
