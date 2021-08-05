@@ -17,7 +17,6 @@ function AuctionCard({tokenID, auctionID, name, description, src, price, auction
 
     return (
         <div className='card' onClick={() => push('/auction/' + url_auction_type + "/" + tokenID + "/" + auctionID)}>
-            {/* <img src={"https://ipfs.io/ipfs/" + src.slice(7)} alt="nft artwork" /> */}
             <img src={uri} alt="nft artwork" />
             <div className="card__info">
                 <h2>{name}</h2>

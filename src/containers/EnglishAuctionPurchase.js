@@ -57,7 +57,6 @@ function EnglishAuctionPurchase(props) {
         const startedAt = parseInt(_auctionDetails.startedAt);
         const duration = parseInt(_auctionDetails.duration);
         const unixAuctionEndTime = startedAt + duration
-        console.log( now, unixAuctionEndTime );
         setAuctionEndTime(auctionEndTimeHumanDate(unixAuctionEndTime));
 
         if(unixAuctionEndTime < now) {

@@ -21,6 +21,10 @@ export const NFT_TransferContract = new web3.eth.Contract(
   contractAddr
 );
 
+//#################################################################
+//# General Utility functions
+//#################################################################
+
 export const getNFTPrice = async (tokenID) => {
   const result = await NFT_TransferContract.methods.getNFTPrice(tokenID).call();
   return result;
@@ -31,24 +35,6 @@ export const getNFTCount = async () => {
   return result;
 };
 
-export const mintNFT = async (name, url, price, onSale, onAuction, auctionType, duration, bidIcrement, endingPrice, decrementPrice) => 
-{
-  const accounts = await web3.eth.getAccounts();
-  const account = accounts[0];
-  const result = await NFT_TransferContract.methods
-    .mintNFT(name, url, price, onSale, onAuction, auctionType, duration, bidIcrement, endingPrice, decrementPrice)
-    .send({
-      from: account,
-    });
-
-  console.log(result);
-};
-
-export const getOnSaleTokens = async () => {
-  const result = await NFT_TransferContract.methods.getOnSaleTokens().call();
-  return result;
-};
-
 export const getUserNfts = async () => {
   const accounts = await web3.eth.getAccounts();
   const account = accounts[0];
@@ -56,28 +42,6 @@ export const getUserNfts = async () => {
     from: account,
   });
   return result;
-};
-
-export const consensusNft = async (tokenId) => {
-  const accounts = await web3.eth.getAccounts();
-  const account = accounts[0];
-  const result = await NFT_TransferContract.methods
-    .consensusNft(tokenId)
-    .send({
-      from: account,
-      value: await getNFTPrice(tokenId),
-    })
-    .on("transactionHash", function (hash) {})
-    .on("receipt", function (receipt) {})
-    .on("confirmation", function (confirmationNumber, receipt) {
-      window.alert("successfully purchase!");
-    })
-    .on("error", function (error, receipt) {
-      window.alert("an error has occured!");
-    });
-
-  window.location.reload();
-  console.log(result);
 };
 
 // get the owner Address of tokenID
@@ -106,6 +70,60 @@ export const getAccountBalance = async () => {
   return result;
 };
 
+
+//#################################################################
+//# Create NFT
+//#################################################################
+
+export const mintNFT = async (name, url, price, onSale, onAuction, auctionType, duration, bidIcrement, endingPrice, decrementPrice) => 
+{
+  const accounts = await web3.eth.getAccounts();
+  const account = accounts[0];
+  const result = await NFT_TransferContract.methods
+    .mintNFT(name, url, price, onSale, onAuction, auctionType, duration, bidIcrement, endingPrice, decrementPrice)
+    .send({
+      from: account,
+    });
+
+  console.log(result);
+};
+
+
+//#################################################################
+//# Sale functions
+//#################################################################
+
+export const getOnSaleTokens = async () => {
+  const result = await NFT_TransferContract.methods.getOnSaleTokens().call();
+  return result;
+};
+
+export const consensusNft = async (tokenId) => {
+  const accounts = await web3.eth.getAccounts();
+  const account = accounts[0];
+  const result = await NFT_TransferContract.methods
+    .consensusNft(tokenId)
+    .send({
+      from: account,
+      value: await getNFTPrice(tokenId),
+    })
+    .on("transactionHash", function (hash) {})
+    .on("receipt", function (receipt) {})
+    .on("confirmation", function (confirmationNumber, receipt) {
+      window.alert("successfully purchase!");
+    })
+    .on("error", function (error, receipt) {
+      window.alert("an error has occured!");
+    });
+
+  window.location.reload();
+  console.log(result);
+};
+
+//#################################################################
+//# Auction Utilities
+//#################################################################
+
 // get all tokens currently on auction
 export const getOnAuctionTokens = async () => {
   const result = await NFT_TransferContract.methods.getOnAuctionTokens().call();
@@ -125,12 +143,16 @@ export const getAuctionType = async (auctionID) => {
 };
 
 
+//#################################################################
+//# English Auction
+//#################################################################
+
+// place bid for auctionID
 export const bid = async (auctionID, yourBid) => {
   const accounts = await web3.eth.getAccounts();
   const account = accounts[0];
-  var result;
   try {
-    result = await NFT_TransferContract.methods
+    await NFT_TransferContract.methods
       .bid(auctionID)
       .send({
         from: account,
@@ -150,15 +172,6 @@ export const bid = async (auctionID, yourBid) => {
     return;
   }
   window.location.reload();
-  console.log(result);
-};
-
-// get the higgest bidder of auctionID
-export const getHighestBid = async (auctionID) => {
-  const result = await NFT_TransferContract.methods
-    .getHighestBid(auctionID)
-    .call();
-  return result;
 };
 
 // get the bid of current account
@@ -170,6 +183,7 @@ export const getBid = async (auctionID) => {
   return result;
 };
 
+// get auction details of auctionID
 export const getAuction = async (auctionID) => {
   const result = await NFT_TransferContract.methods
     .getAuction(auctionID)
@@ -177,6 +191,7 @@ export const getAuction = async (auctionID) => {
   return result;
 };
 
+// withdraw balance for given auctionID
 export const withdrawBalance = async (auctionID) => {
   const accounts = await web3.eth.getAccounts();
   const account = accounts[0];
@@ -206,10 +221,26 @@ export const getDutchAuction = async (auctionID) => {
   return result;
 };
 
+export const getDutchAuctionPrice = async (_auctionDetails, _data, _auctionCompleted) => {
+
+  const nftPrice = _data.price;
+  const endingPrice = _auctionDetails.endingPrice;
+  if (_auctionCompleted) {
+      return endingPrice;
+  }
+  const now = Math.floor((Date.now()) / 1000); // UNIX time in sec
+  const diffTime = Math.round((now - _auctionDetails.startedAt) / 60); // Difference in time in minutes
+  const price = nftPrice - (diffTime * _auctionDetails.decrementPrice);
+  if (price <= endingPrice) {
+      return endingPrice;
+  }
+  return price;
+}
+
 export const consensusDutchAuction = async (auctionID, price) => {
   const accounts = await web3.eth.getAccounts();
   const account = accounts[0];
-  const result = await NFT_TransferContract.methods
+  await NFT_TransferContract.methods
     .consensusDutchAuction(auctionID)
     .send({
       from: account,
@@ -225,5 +256,66 @@ export const consensusDutchAuction = async (auctionID, price) => {
     });
 
   window.location.reload();
-  console.log(result);
+};
+
+//#################################################################
+//# Blind Auction 
+//#################################################################
+
+export const getBlindAuction = async (auctionID) => {
+  const result = await NFT_TransferContract.methods
+    .getBlindAuction(auctionID)
+    .call();
+  return result;
+};
+
+// get the bid of current account
+export const getBlindAuctionBid = async (auctionID) => {
+  const accounts = await web3.eth.getAccounts();
+  const result = await NFT_TransferContract.methods
+    .getBlindAuctionBid(auctionID, accounts[0])
+    .call();
+  return result;
+};
+
+export const bidBlindAuction = async (auctionID, yourBid) => {
+  const accounts = await web3.eth.getAccounts();
+  const account = accounts[0];
+  try {
+    await NFT_TransferContract.methods
+      .bidBlindAuction(auctionID)
+      .send({
+        from: account,
+        value: yourBid,
+      })
+      .on("transactionHash", function (hash) {})
+      .on("receipt", function (receipt) {})
+      .on("confirmation", function (confirmationNumber, receipt) {
+        window.alert("successfully bid!");
+      })
+      .on("error", function (error, receipt) {
+        console.log(error);
+        window.alert("an error has occured!");
+      });
+  } catch (e) {
+    console.log(e);
+    return;
+  }
+  window.location.reload();
+};
+
+export const withdrawBalanceBlindAuction = async (auctionID) => {
+  const accounts = await web3.eth.getAccounts();
+  const account = accounts[0];
+  try {
+    const result = await NFT_TransferContract.methods
+      .withdrawBalanceBlindAuction(auctionID)
+      .send({
+        from: account,
+      });
+    return result;
+  } catch (e) {
+    console.log(e.message);
+    return false;
+  }
 };

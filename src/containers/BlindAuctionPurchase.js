@@ -4,15 +4,15 @@ import { Icon } from '@iconify/react';
 import ethereumIcon from '@iconify-icons/mdi/ethereum';
 import keyboardBackspace from '@iconify-icons/mdi/keyboard-backspace';
 import { useHistory } from 'react-router-dom'
-import { getAccountAddress, tokenURI, web3, getDutchAuction, consensusDutchAuction, getDutchAuctionPrice } from '../services/web3';
+import { getAccountAddress, tokenURI, web3, bidBlindAuction, getBlindAuction, getBlindAuctionBid, withdrawBalanceBlindAuction } from '../services/web3';
 import axios from 'axios';
 
-function DutchAuctionPurchase(props) {
-
+function BlindAuctionPurchase(props) {
     const { goBack } = useHistory()
     
     const tokenID = props.match.params.tokenID;
     const auctionID = props.match.params.auctionID;
+    const [account, setAccount] = useState('');
     const [data, setData] = useState({
         name: '',
         price: '',
@@ -20,6 +20,8 @@ function DutchAuctionPurchase(props) {
         description: '',
     });
     const [isDisable, setIsDisable] = useState(true);
+    const [inputBid, setInputBid] = useState(0);
+    const [yourBid, setYourBid] = useState(0);
     const [auctionDetails, setAuctionDetails] = useState({
         id: '',
         nft: '',
@@ -28,13 +30,11 @@ function DutchAuctionPurchase(props) {
         startedAt: '',
         startBlock: '',
         status: '',
-        endingPrice: '',
-        decrementPrice: '',
-        completed: ''
+        highestBid: '',
+        highestBidder: '',
     })
     const [auctionCompleted, setAuctionCompleted] = useState(false);
     const [auctionEndTime, setAuctionEndTime] = useState(0);
-    const [currentPrice, setCurrentPrice] = useState(0);
 
     const dwebLink = (url) => {
         var uri = url.slice(7); 
@@ -51,16 +51,12 @@ function DutchAuctionPurchase(props) {
         return humanDateFormat;
     }
 
-    const checkAuctionEnd = async (_auctionDetails, _data) => {
+    const checkAuctionEnd = (_auctionDetails) => {
         const now = Math.floor((Date.now()) / 1000); // UNIX time in sec
         const startedAt = parseInt(_auctionDetails.startedAt);
         const duration = parseInt(_auctionDetails.duration);
         const unixAuctionEndTime = startedAt + duration
-        console.log( now, _auctionDetails.startedAt );
         setAuctionEndTime(auctionEndTimeHumanDate(unixAuctionEndTime));
-
-        const result = await getDutchAuctionPrice(_auctionDetails, _data, auctionCompleted);
-        setCurrentPrice(result);
 
         if(unixAuctionEndTime < now) {
             console.log("Auction completed")
@@ -80,21 +76,20 @@ function DutchAuctionPurchase(props) {
     
             setData(result.data);
 
-            const _auctionDetails = await getDutchAuction(auctionID);
+            const _auctionDetails = await getBlindAuction(auctionID);
             setAuctionDetails(_auctionDetails);
+
+            const _yourBid = await getBlindAuctionBid(auctionID);
+            setYourBid(_yourBid);
 
             const ownerAddr = _auctionDetails.seller;
             const userAddr = await getAccountAddress();
+            setAccount(userAddr);
             const disable = ownerAddr === userAddr;
             setIsDisable(disable);
 
-            if(_auctionDetails.completed) {
-                setCurrentPrice(result.data.price);
-                setAuctionCompleted(true);
-            }
-            else {
-                await checkAuctionEnd(_auctionDetails, result.data);
-            }
+            checkAuctionEnd(_auctionDetails);
+
         };
 
         fetchData();
@@ -105,14 +100,10 @@ function DutchAuctionPurchase(props) {
         if(auctionDetails.startedAt === "") { 
             return
         }
-        if(auctionDetails.completed) {
-            setCurrentPrice(data.price);
-            setAuctionCompleted(true);
-        }
         let interval
         if(!auctionCompleted) {
-            interval = setInterval(async () => {
-                await checkAuctionEnd(auctionDetails, data);
+            interval = setInterval(() => {
+                checkAuctionEnd(auctionDetails);
             }, 10000);
         }
         else {
@@ -121,8 +112,22 @@ function DutchAuctionPurchase(props) {
         return () => clearInterval(interval);
     }, [auctionCompleted, auctionDetails]) 
 
-    const buyNFT = async () => {
-        await consensusDutchAuction(auctionID, currentPrice);
+    const onPlaceBid = () => {
+        if(inputBid !== 0) {
+            bidBlindAuction(auctionID, web3.utils.toWei(inputBid));
+        }
+        else {
+            window.alert("Increase bid price");
+        }
+    }
+
+    const withdraw = async () => {
+        const result = await withdrawBalanceBlindAuction(auctionID);
+        console.log(result)
+        if (result) {
+            window.alert("Transaction is successful");
+            window.location.reload();
+        }
     }
 
     return (
@@ -149,19 +154,56 @@ function DutchAuctionPurchase(props) {
                             <h2>Initial: {web3.utils.fromWei((data.price).toString())}</h2>
                             <Icon icon={ethereumIcon} style={{ color: 'white' }} className='symbol'/>
                         </div>
+                        {/* These might not be working properly */}
                         {
-                            (!auctionCompleted) && !auctionDetails.completed &&
-                            <button onClick={buyNFT} disabled={isDisable}>Buy now</button>
+                            (!auctionCompleted) &&
+                            <button onClick={onPlaceBid} disabled={isDisable}>Bid</button>
+                        }
+                        {
+                            // eslint-disable-next-line
+                            (auctionCompleted) && (!isDisable) && (auctionDetails.highestBid !== yourBid) && (yourBid != 0) &&
+                            <React.Fragment>
+                                <h3>Sorry you didn't win</h3>
+                                <button onClick={withdraw}>Withdraw balance</button>
+                            </React.Fragment>
+                        }
+                        {
+                            (auctionCompleted) && (auctionDetails.highestBidder === account) &&
+                            <React.Fragment>
+                                <h3>Congrats! You Won!</h3>
+                                <button onClick={withdraw}>Claim your NFT</button>
+                            </React.Fragment>
+                        }
+                        {
+                            (isDisable) && (auctionCompleted) &&
+                            <button onClick={withdraw}>Claim your money</button>
                         }
                     </div>
                     <div className="purchase__auctionDetails">
                         <div className="purchase__auctionDetails__Bids">
-                            <h2>Current Price: {web3.utils.fromWei(currentPrice.toString())}</h2> 
+                            {
+                                (auctionDetails.highestBidder === account) && (auctionCompleted) ?
+                                <h2>Your Bid: {web3.utils.fromWei((auctionDetails.highestBid).toString())}</h2> :
+                                <h2>Your Bid: {web3.utils.fromWei((yourBid).toString())}</h2> 
+                            }
                         </div>
+                        {(!auctionCompleted) && (yourBid !== 0) &&
+                        <React.Fragment>
+                        <label>Place your bid (allowed only once)</label>
+                        <input 
+                        required
+                        type="number" 
+                        min="0.01"
+                        step="0.01" 
+                        value={inputBid}
+                        onChange={(e) => setInputBid(e.target.value)}
+                        />
+                        </React.Fragment>
+                        }
                     </div>
                 </div>
             </div> 
     )
 }
 
-export default DutchAuctionPurchase;
+export default BlindAuctionPurchase;
