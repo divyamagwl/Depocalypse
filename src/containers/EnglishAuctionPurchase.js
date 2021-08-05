@@ -7,12 +7,9 @@ import { useHistory } from 'react-router-dom'
 import { getAccountAddress, tokenURI, web3, bid, getAuction, getBid, withdrawBalance } from '../services/web3';
 import axios from 'axios';
 
-// TODO: Add a loader because second useEffect takes some time
-
-function AuctionPurchase(props) {
+function EnglishAuctionPurchase(props) {
     const { goBack } = useHistory()
     
-
     const tokenID = props.match.params.tokenID;
     const auctionID = props.match.params.auctionID;
     const [account, setAccount] = useState('');
@@ -205,4 +202,4 @@ function AuctionPurchase(props) {
     )
 }
 
-export default AuctionPurchase
+export default EnglishAuctionPurchase;

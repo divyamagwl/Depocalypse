@@ -38,8 +38,13 @@ function CreateNFT({wallet, isLoggedIn}) {
     const [description, setDescription] = useState('');
     const [market, setMarket] = useState('Sell');
     const [dataUri, setDataUri] = useState('')
-    const [price, setPrice] = useState('')
+    const [price, setPrice] = useState('0')
     const [isLoading, setIsLoading] = useState(false);
+    const [auctionType, setAuctionType] = useState('0');
+    const [duration, setDuration]= useState('0');
+    const [bidIcrement, setBidIncrement] = useState('0');
+    const [endingPrice, setEndingPrice] = useState('0');
+    const [decrementPrice, setDecrementPrice] = useState('0');
 
     const onChange = (file) => {
     
@@ -81,14 +86,27 @@ function CreateNFT({wallet, isLoggedIn}) {
         window.alert("successfully stored");
 
         var storageUrl = metadata.url;
-        await mintNFT(name, storageUrl, weiPrice, market==='Sell'? true : false, market==='Auction'? true : false);
+        // var storageUrl = "hello";
+        await mintNFT(
+          name, 
+          storageUrl, 
+          weiPrice, 
+          market==='Sell'? true : false, 
+          market==='Auction'? true : false, 
+          auctionType, 
+          duration,
+          web3.utils.toWei(bidIcrement),
+          web3.utils.toWei(endingPrice),
+          web3.utils.toWei(decrementPrice)
+          );
         setIsLoading(false);
 
         
         window.location.reload();
         // push('/');
       }
-      catch{
+      catch (e) {
+        console.log(e);
         window.alert('an error has occured, try again!');
         setIsLoading(false);
       }
@@ -139,15 +157,126 @@ function CreateNFT({wallet, isLoggedIn}) {
                   <option value="Auction">Auction</option>
                   </select>
 
-                  <label>Price in ETH</label>
-                  <input 
-                  required
-                  type="number" 
-                  min="0.01"
-                  step="0.01" 
-                  value={price}
-                  onChange={(e) => setPrice(e.target.value)}
-                  />
+                  {
+                    (market==='Auction') &&
+                    <React.Fragment>
+                      <label>Type of Auction</label>
+                      <select
+                      value={auctionType}
+                      onChange={(e) => setAuctionType(e.target.value)}
+                      >
+                      <option value="0">English</option>
+                      <option value="1">Dutch</option>
+                      <option value="2">Blind</option>
+                      </select>
+                    </React.Fragment>
+                  }
+
+                  {
+                    (market==='Auction') && (auctionType==='0') &&
+                    <React.Fragment>
+                      <label>Bid Increment</label>
+                      <input 
+                      required
+                      type="number" 
+                      min="0.01"
+                      step="0.01" 
+                      value={bidIcrement}
+                      onChange={(e) => setBidIncrement(e.target.value)}
+                      />
+
+                      <label>Starting Price in ETH</label>
+                      <input 
+                      required
+                      type="number" 
+                      min="0.01"
+                      step="0.01" 
+                      value={price}
+                      onChange={(e) => setPrice(e.target.value)}
+                      />
+                    </React.Fragment>
+                  }
+
+                  {
+                    (market==='Auction') && (auctionType==='1') &&
+                    <React.Fragment>
+                      <label>Minimum Ending Price</label>
+                      <input 
+                      required
+                      type="number" 
+                      min="0.01"
+                      step="0.01" 
+                      value={endingPrice}
+                      onChange={(e) => setEndingPrice(e.target.value)}
+                      />
+
+                      <label>Price Decrement (for each min)</label>
+                      <input 
+                      required
+                      type="number" 
+                      min="0.001"
+                      step="0.001" 
+                      value={decrementPrice}
+                      onChange={(e) => setDecrementPrice(e.target.value)}
+                      />
+
+                      <label>Maximum Starting Price in ETH</label>
+                      <input 
+                      required
+                      type="number" 
+                      min="0.01"
+                      step="0.01" 
+                      value={price}
+                      onChange={(e) => setPrice(e.target.value)}
+                      />
+
+                    </React.Fragment>
+                  }
+
+                  {
+                    (market==='Auction') && (auctionType==='2') &&
+                    <React.Fragment>
+                      <label>Minimum Price in ETH</label>
+                      <input 
+                      required
+                      type="number" 
+                      min="0.01"
+                      step="0.01" 
+                      value={price}
+                      onChange={(e) => setPrice(e.target.value)}
+                      />
+                    </React.Fragment>
+                  }
+
+                  {
+                    (market==='Auction') &&
+                    <React.Fragment>
+                      <label>Duration (in seconds)</label>
+                      <input 
+                      required
+                      type="number" 
+                      min="60"
+                      step="60" 
+                      value={duration}
+                      onChange={(e) => setDuration(e.target.value)}
+                      />
+                    </React.Fragment>
+                  }
+
+                  {
+                    (market==='Sell') &&
+                    <React.Fragment>
+                      <label>Price in ETH</label>
+                      <input 
+                      required
+                      type="number" 
+                      min="0.01"
+                      step="0.01" 
+                      value={price}
+                      onChange={(e) => setPrice(e.target.value)}
+                      />
+                    </React.Fragment>
+                  }
 
                   <button>Mint NFT </button>
               </form>

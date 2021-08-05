@@ -5,9 +5,10 @@ import Market from './containers/Market';
 import Auction from './containers/Auction';
 import './BaseRouter.css'
 import Purchase from './containers/Purchase';
-import AuctionPurchase from './containers/AuctionPurchase';
+import EnglishAuctionPurchase from './containers/EnglishAuctionPurchase';
+import DutchAuctionPurchase from './containers/DutchAuctionPurchase';
 import axios from 'axios';
-import { getOnSaleTokens, getOnAuctionTokens, getUserNfts, tokenURI, getAuctionId } from './services/web3';
+import { getOnSaleTokens, getOnAuctionTokens, getUserNfts, tokenURI, getAuctionId, getAuctionType } from './services/web3';
 import LoadingScreen from './LoadingScreen';
 import NoNftScreen from './NoNftScreen';
 
@@ -17,102 +18,68 @@ function BaseRouter({wallet, isLoggedIn}) {
     const [auctionNfts, setAuctionNfts] = useState(null);
     const [yourNfts, setYourNfts] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
+
+    const getURI = async (i) => {
+      var uri = await tokenURI(i);
+      uri = uri.slice(7); 
+      uri = uri.substring(0, uri.length - 14);
+      uri = 'https://' + uri + '.ipfs.dweb.link/metadata.json';
+      return uri
+    }
  
     useEffect(() => {
         setTimeout(() => {}, 2000);
 
         const fetchData = async () => {
-            const onSaleNfts = await getOnSaleTokens();
-            // console.log(onSaleNfts);
+            const onSaleNftIDs = await getOnSaleTokens();
             const userNfts = await getUserNfts();
             
-            const count = parseInt(onSaleNfts[0]);
-            const onSaleNftsArray = onSaleNfts.slice(1,count+1);
+            const count = parseInt(onSaleNftIDs[0]);
+            const onSaleNftsArray = onSaleNftIDs.slice(1,count+1);
 
-            var nft_array = [];
+            var sale_nft_array = [];
             onSaleNftsArray.forEach(async i => {
-              var uri = await tokenURI(i);
-              // uri = 'https://ipfs.io/ipfs/' + uri.slice(7);
-              uri = uri.slice(7); 
-              uri = uri.substring(0, uri.length - 14);
-              uri = 'https://' + uri + '.ipfs.dweb.link/metadata.json';
-              // var result = await axios(uri)
+              var uri = await getURI(i);
               await axios.get(uri).then(result => {
                 var nft = result.data;
                 nft.tokenID = i;
-                nft_array.push(nft);
-              }).catch(error => {
-                if (error.response) {
-                  // Request made and server responded
-                  console.log(error.response.data);
-                  console.log(error.response.status);
-                  console.log(error.response.headers);
-                } else if (error.request) {
-                  // The request was made but no response was received
-                  console.log(error.request);
-                } else {
-                  // Something happened in setting up the request that triggered an Error
-                  console.log('Error', error.message);
-                }
-              })
-              
+                sale_nft_array.push(nft);
+              }).catch(error => { console.log(error); })
             });
             
-            
-
-            var nft_array_2 = [];
+            var your_nft_array = [];
             userNfts.forEach(async i =>  {
-              var uri = await tokenURI(i);
-              // uri = 'https://ipfs.io/ipfs/' + uri.slice(7);
-              uri = uri.slice(7); 
-              uri = uri.substring(0, uri.length - 14);
-              uri = 'https://' + uri + '.ipfs.dweb.link/metadata.json';
-              // var result = await axios(uri)
+              var uri = await getURI(i);
               await axios.get(uri).then(result => {
                 var nft = result.data;
                 nft.tokenID = i;
-                nft_array_2.push(nft);
-              }).catch(error => {
-                if (error.response) {
-                  // Request made and server responded
-                  console.log(error.response.data);
-                  console.log(error.response.status);
-                  console.log(error.response.headers);
-                } else if (error.request) {
-                  // The request was made but no response was received
-                  console.log(error.request);
-                } else {
-                  // Something happened in setting up the request that triggered an Error
-                  console.log('Error', error.message);
-                }
-              })   
-          });
+                your_nft_array.push(nft);
+              }).catch(error => { console.log(error); })
+            });
 
           const onAuctionNfts = await getOnAuctionTokens();
-          // console.log(onAuctionNfts);          
-          const count2 = parseInt(onAuctionNfts[0]);
-          const onAuctionNftsArray = onAuctionNfts.slice(1,count2+1);
+          console.log(onAuctionNfts);
+          const countAuction = parseInt(onAuctionNfts[0]);
+          const onAuctionNftsArray = onAuctionNfts.slice(1,countAuction+1);
 
-          var nft_array_3 = [];
+          var auction_nft_array = [];
           onAuctionNftsArray.forEach(async i => {
-            var uri = await tokenURI(i);
-            uri = uri.slice(7); 
-            uri = uri.substring(0, uri.length - 14);
-            uri = 'https://' + uri + '.ipfs.dweb.link/metadata.json';
-
+            var uri = await getURI(i);
             var nft;
             await axios.get(uri).then(result => {
               nft = result.data;
               nft.tokenID = i;
-              nft_array_3.push(nft);
+              auction_nft_array.push(nft);
             }).catch(error => { console.log(error) })
+
             nft.auctionID = await getAuctionId(i);
-            // console.log(nft);
+            nft.auctionType = await getAuctionType(nft.auctionID);
+            console.log(nft.auctionType);
           });
 
-          setNfts(nft_array);
-          setAuctionNfts(nft_array_3)
-          setYourNfts(nft_array_2);
+          setNfts(sale_nft_array);
+          setAuctionNfts(auction_nft_array)
+          setYourNfts(your_nft_array);
           setTimeout(() => setIsLoading(false), 3000);
         };
         
@@ -135,7 +102,8 @@ function BaseRouter({wallet, isLoggedIn}) {
       )}/>
       <Route exact path='/your-gallery' render={() => ( yourNfts.length > 0 ? <Market nfts={yourNfts} /> : <NoNftScreen/> )}/>
       <Route path="/market/:tokenID" component={Purchase} />
-      <Route path="/auction/:tokenID/:auctionID" component={AuctionPurchase} />
+      <Route path="/auction/e/:tokenID/:auctionID" component={EnglishAuctionPurchase} />
+      <Route path="/auction/d/:tokenID/:auctionID" component={DutchAuctionPurchase} />
     </Switch>}
   </div>)
 };

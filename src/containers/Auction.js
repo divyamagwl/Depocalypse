@@ -14,6 +14,7 @@ function Auction({nfts}) {
                     description={nft.description}
                     src={nft.image}
                     price={nft.price}
+                    auctionType={nft.auctionType}
                     />
                 ))
                 }

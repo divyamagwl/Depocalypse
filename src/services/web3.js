@@ -15,7 +15,7 @@ export const portis = new Portis(
 // export const web3 = new Web3(portis.provider);
 export const web3 = new Web3(Web3.givenProvider);
 // change to the orignal deployed address
-const contractAddr = "0x30a5A8A6b0d9669F548fd919aF455De5ec1Cbac0";
+const contractAddr = "0x4F89b9B21774d6ECE577Fc99650fAE2d4fdBbC14";
 export const NFT_TransferContract = new web3.eth.Contract(
   NFT_TransferAbi,
   contractAddr
@@ -31,11 +31,12 @@ export const getNFTCount = async () => {
   return result;
 };
 
-export const mintNFT = async (name, url, price, onSale, onAuction) => {
+export const mintNFT = async (name, url, price, onSale, onAuction, auctionType, duration, bidIcrement, endingPrice, decrementPrice) => 
+{
   const accounts = await web3.eth.getAccounts();
   const account = accounts[0];
   const result = await NFT_TransferContract.methods
-    .mintNFT(name, url, price, onSale, onAuction)
+    .mintNFT(name, url, price, onSale, onAuction, auctionType, duration, bidIcrement, endingPrice, decrementPrice)
     .send({
       from: account,
     });
@@ -117,6 +118,13 @@ export const getAuctionId = async (tokenID) => {
   return result;
 };
 
+// get the auctionType of given auctionID
+export const getAuctionType = async (auctionID) => {
+  const result = await NFT_TransferContract.methods.getAuctionType(auctionID).call();
+  return result;
+};
+
+
 export const bid = async (auctionID, yourBid) => {
   const accounts = await web3.eth.getAccounts();
   const account = accounts[0];
@@ -184,4 +192,27 @@ export const withdrawBalance = async (auctionID) => {
     console.log(e.message);
     return false;
   }
+};
+
+
+//#################################################################
+//# Dutch Auction 
+//#################################################################
+
+export const getDutchAuctionPrice = async (auctionID) => {
+  try {
+    const result = await NFT_TransferContract.methods
+    .getDutchAuctionPrice(auctionID)
+    .call();
+    console.log(result);
+    return result;
+  }
+  catch (e) { console.log(e); }
+};
+
+export const getDutchAuction = async (auctionID) => {
+  const result = await NFT_TransferContract.methods
+    .getDutchAuction(auctionID)
+    .call();
+  return result;
 };
