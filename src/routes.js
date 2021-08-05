@@ -11,6 +11,7 @@ import axios from 'axios';
 import { getOnSaleTokens, getOnAuctionTokens, getUserNfts, tokenURI, getAuctionId, getAuctionType } from './services/web3';
 import LoadingScreen from './LoadingScreen';
 import NoNftScreen from './NoNftScreen';
+import BlindAuctionPurchase from './containers/BlindAuctionPurchase';
 
 function BaseRouter({wallet, isLoggedIn}) {
 
@@ -104,6 +105,7 @@ function BaseRouter({wallet, isLoggedIn}) {
       <Route path="/market/:tokenID" component={Purchase} />
       <Route path="/auction/e/:tokenID/:auctionID" component={EnglishAuctionPurchase} />
       <Route path="/auction/d/:tokenID/:auctionID" component={DutchAuctionPurchase} />
+      <Route path="/auction/b/:tokenID/:auctionID" component={BlindAuctionPurchase} />
     </Switch>}
   </div>)
 };
