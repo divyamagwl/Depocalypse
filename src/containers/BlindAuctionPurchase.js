@@ -4,7 +4,7 @@ import { Icon } from '@iconify/react';
 import ethereumIcon from '@iconify-icons/mdi/ethereum';
 import keyboardBackspace from '@iconify-icons/mdi/keyboard-backspace';
 import { useHistory } from 'react-router-dom'
-import { getAccountAddress, tokenURI, web3, bidBlindAuction, getBlindAuction, getBlindAuctionBid, withdrawBalanceBlindAuction } from '../services/web3';
+import { getAccountAddress, tokenURI, web3, bidBlindAuction, getBlindAuction, getBlindAuctionBid, withdrawBalanceBlindAuction, ownerOf } from '../services/web3';
 import axios from 'axios';
 
 function BlindAuctionPurchase(props) {
@@ -35,6 +35,7 @@ function BlindAuctionPurchase(props) {
     })
     const [auctionCompleted, setAuctionCompleted] = useState(false);
     const [auctionEndTime, setAuctionEndTime] = useState(0);
+    const [currentOwner, setCurrentOwner] = useState('');
 
     const dwebLink = (url) => {
         var uri = url.slice(7); 
@@ -90,6 +91,8 @@ function BlindAuctionPurchase(props) {
 
             checkAuctionEnd(_auctionDetails);
 
+            const currOwner = await ownerOf(tokenID);
+            setCurrentOwner(currOwner);
         };
 
         fetchData();
@@ -168,7 +171,7 @@ function BlindAuctionPurchase(props) {
                             </React.Fragment>
                         }
                         {
-                            (auctionCompleted) && (auctionDetails.highestBidder === account) &&
+                            (auctionCompleted) && (auctionDetails.highestBidder === account) && (currentOwner !== account) &&
                             <React.Fragment>
                                 <h3>Congrats! You Won!</h3>
                                 <button onClick={withdraw}>Claim your NFT</button>
@@ -201,6 +204,7 @@ function BlindAuctionPurchase(props) {
                         </React.Fragment>
                         }
                     </div>
+                    <h2>Auction Type: Blind</h2>
                 </div>
             </div> 
     )

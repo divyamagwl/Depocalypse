@@ -4,7 +4,7 @@ import { Icon } from '@iconify/react';
 import ethereumIcon from '@iconify-icons/mdi/ethereum';
 import keyboardBackspace from '@iconify-icons/mdi/keyboard-backspace';
 import { useHistory } from 'react-router-dom'
-import { getAccountAddress, tokenURI, web3, bid, getAuction, getBid, withdrawBalance } from '../services/web3';
+import { getAccountAddress, tokenURI, web3, bid, getAuction, getBid, withdrawBalance, ownerOf } from '../services/web3';
 import axios from 'axios';
 
 function EnglishAuctionPurchase(props) {
@@ -36,6 +36,7 @@ function EnglishAuctionPurchase(props) {
     })
     const [auctionCompleted, setAuctionCompleted] = useState(false);
     const [auctionEndTime, setAuctionEndTime] = useState(0);
+    const [currentOwner, setCurrentOwner] = useState('');
 
     const dwebLink = (url) => {
         var uri = url.slice(7); 
@@ -91,6 +92,8 @@ function EnglishAuctionPurchase(props) {
 
             checkAuctionEnd(_auctionDetails);
 
+            const currOwner = await ownerOf(tokenID);
+            setCurrentOwner(currOwner);
         };
 
         fetchData();
@@ -166,7 +169,7 @@ function EnglishAuctionPurchase(props) {
                             <button onClick={withdraw}>Withdraw balance</button>
                         }
                         {
-                            (auctionDetails.highestBidder === account) && (auctionCompleted) &&
+                            (auctionDetails.highestBidder === account) && (auctionCompleted) && (currentOwner !== account) &&
                             <button onClick={withdraw}>Claim your NFT</button>
                         }
                         {
@@ -198,6 +201,7 @@ function EnglishAuctionPurchase(props) {
                         </React.Fragment>
                         }
                     </div>
+                    <h2>Auction Type: English</h2>
                 </div>
             </div> 
     )

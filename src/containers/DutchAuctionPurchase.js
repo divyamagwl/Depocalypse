@@ -10,7 +10,6 @@ import axios from 'axios';
 function DutchAuctionPurchase(props) {
 
     const { goBack } = useHistory()
-    
     const tokenID = props.match.params.tokenID;
     const auctionID = props.match.params.auctionID;
     const [data, setData] = useState({
@@ -128,7 +127,7 @@ function DutchAuctionPurchase(props) {
     return (
             
             <div className='purchase'>
-            <div className="goback">
+                <div className="goback">
                     <Icon icon={keyboardBackspace} onClick={goBack} className='gobackButton'/> 
                 </div> 
                 <div className='purchase__header'> 
@@ -159,6 +158,7 @@ function DutchAuctionPurchase(props) {
                             <h2>Current Price: {web3.utils.fromWei(currentPrice.toString())}</h2> 
                         </div>
                     </div>
+                    <h2>Auction Type: Dutch</h2>
                 </div>
             </div> 
     )
