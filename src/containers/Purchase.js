@@ -6,6 +6,7 @@ import keyboardBackspace from '@iconify-icons/mdi/keyboard-backspace';
 import { useHistory } from 'react-router-dom'
 import { consensusNft, getAccountAddress, ownerOf, tokenURI, web3 } from '../services/web3';
 import axios from 'axios';
+import { getPriceFeed } from '../services/priceFeed';
 
 function Purchase(props) {
     const { goBack } = useHistory()
@@ -20,6 +21,7 @@ function Purchase(props) {
     });
     const [isDisable, setIsDisable] = useState(true);
     // const [isLoading, setIsLoading] = useState('');
+    const [latestPrice, setLatestPrice] = useState(0);
 
     const dwebLink = (url) => {
         var uri = url.slice(7); 
@@ -44,6 +46,9 @@ function Purchase(props) {
             const disable = ownerAddr === userAddr;
         
             setIsDisable(disable);
+
+            const price = await getPriceFeed();
+            setLatestPrice(price);
           };
        
          fetchData();
@@ -73,6 +78,7 @@ function Purchase(props) {
                         </div>
                         <button onClick={() => {consensusNft(tokenID)}} disabled={isDisable}>Buy now</button>
                     </div>
+                    <h2>{(latestPrice*web3.utils.fromWei((data.price).toString())).toString().substring(0, 4)} USD</h2>
                 </div>
             </div> 
     )
