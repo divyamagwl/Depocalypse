@@ -11,6 +11,7 @@ contract NFT_Transfer is ERC721URIStorage {
         uint price;
         bool onSale;
         bool onAuction;
+        bool onCharity;
     }
 
     // An array of Nft storing Nft objects sequentially
@@ -44,6 +45,7 @@ contract NFT_Transfer is ERC721URIStorage {
         uint _price, 
         bool _onSale, 
         bool _onAuction,
+        bool _onCharity,
         uint _auctionType,
         uint256 _duration,
         uint256 _bidIncrement,
@@ -52,7 +54,7 @@ contract NFT_Transfer is ERC721URIStorage {
     )
     public returns(uint) {
         uint id = NftCatalogue.length;
-        NftCatalogue.push(Nft(id, _name, _url, _price, _onSale, _onAuction));
+        NftCatalogue.push(Nft(id, _name, _url, _price, _onSale, _onAuction, _onCharity));
         _safeMint(msg.sender, id);
         _setTokenURI(id, _url);
         tokenBalance[msg.sender] += 1;
@@ -92,6 +94,25 @@ contract NFT_Transfer is ERC721URIStorage {
 
         return onSaleTokenIds;
     }
+    
+    // will send charity tokens
+    function getOnCharityTokens() public view returns(uint[] memory) {
+        uint catalog_length = NftCatalogue.length;
+        uint[] memory onCharityTokenIds = new uint[](catalog_length + 1);
+        uint j = 0;
+        for (uint i = 0; i < catalog_length; i ++) {
+            if (NftCatalogue[i].onCharity == true) {
+                j = j + 1;
+                onCharityTokenIds[j] = NftCatalogue[i].id;
+            }
+            // first positon will give the size of sale token
+            onCharityTokenIds[0] = j;
+        }
+
+        return onCharityTokenIds;
+    }
+    
+    
 
     // will be used for my gallery
     function getUserNfts() public view returns(uint[] memory) {
@@ -220,7 +241,7 @@ contract NFT_Transfer is ERC721URIStorage {
     //#################################################################
 
     function getOnAuctionTokens() public view returns(uint[] memory) {
-        uint catalog_length = auctions.length;
+        uint catalog_length = NftCatalogue.length;
         uint[] memory onAuctionTokenIds = new uint[](catalog_length + 1);
         uint j = 0;
         for (uint i = 0; i < catalog_length; i ++) {
