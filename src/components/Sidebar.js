@@ -17,6 +17,7 @@ function Sidebar({showPortis, isLoggedIn, setWallet, setIsLoggedIn, wallet, emai
             <div className="sidebar__options">
                 <h3 onClick={() => push('/')}>Marketplace</h3>
                 <h3 onClick={() => push('/auctions')}>Auctionplace</h3>
+                <h3 onClick={() => push('/charity')}>Charity</h3>
                 <h3 onClick={() => push('/create-nft')}>Create NFT</h3>
                 <h3 onClick={() => push('/your-gallery')}>Your Gallery</h3>
                 {

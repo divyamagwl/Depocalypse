@@ -1,6 +1,15 @@
 import Portis from "@portis/web3";
 import Web3 from "web3";
 import { NFT_TransferAbi } from "./abi";
+import SuperfluidSDK from '@superfluid-finance/js-sdk';
+
+// utility functions
+const {
+  toWad,
+  toBN,
+  fromWad,
+  wad4human
+} = require("@decentral.ee/web3-helpers");
 
 // const myPrivateEthereumNode = {
 //   nodeUrl: 'https://rpc-mumbai.matic.today',
@@ -15,11 +24,16 @@ export const portis = new Portis(
 // export const web3 = new Web3(portis.provider);
 export const web3 = new Web3(Web3.givenProvider);
 // change to the orignal deployed address
-const contractAddr = "0x14043c8242DDaEe647849C560C39FBf6eD551C74";
+const contractAddr = "0x8eA63Ce6f19bd228ac01e1b66554ebb278512C47";
 export const NFT_TransferContract = new web3.eth.Contract(
   NFT_TransferAbi,
   contractAddr
 );
+
+export const sf = new SuperfluidSDK.Framework({
+  web3: web3,
+  tokens: ["fDAI"]
+});
 
 //#################################################################
 //# General Utility functions
@@ -75,12 +89,12 @@ export const getAccountBalance = async () => {
 //# Create NFT
 //#################################################################
 
-export const mintNFT = async (name, url, price, onSale, onAuction, auctionType, duration, bidIcrement, endingPrice, decrementPrice) => 
+export const mintNFT = async (name, url, price, onSale, onAuction, onCharity, auctionType, duration, bidIcrement, endingPrice, decrementPrice) => 
 {
   const accounts = await web3.eth.getAccounts();
   const account = accounts[0];
   const result = await NFT_TransferContract.methods
-    .mintNFT(name, url, price, onSale, onAuction, auctionType, duration, bidIcrement, endingPrice, decrementPrice)
+    .mintNFT(name, url, price, onSale, onAuction, onCharity, auctionType, duration, bidIcrement, endingPrice, decrementPrice)
     .send({
       from: account,
     });
@@ -88,13 +102,17 @@ export const mintNFT = async (name, url, price, onSale, onAuction, auctionType, 
   console.log(result);
 };
 
-
 //#################################################################
 //# Sale functions
 //#################################################################
 
 export const getOnSaleTokens = async () => {
   const result = await NFT_TransferContract.methods.getOnSaleTokens().call();
+  return result;
+};
+
+export const getOnCharityTokens = async () => {
+  const result = await NFT_TransferContract.methods.getOnCharityTokens().call();
   return result;
 };
 
@@ -319,3 +337,65 @@ export const withdrawBalanceBlindAuction = async (auctionID) => {
     return false;
   }
 };
+
+// ########### CHARITY ###########
+
+export const startFlow = async (tokenID, flowRate) => {
+  const accounts = await web3.eth.getAccounts();
+  const account = accounts[0];
+
+    // await sf.initialize();
+    console.log('reached here')
+    const carol = sf.user({
+      address: account,
+      token: '0x5D8B4C2554aeB7e86F387B4d6c00Ac33499Ed01f'
+    });
+
+    // var details = await carol.details();
+    // console.log(details);
+    console.log('reached here 2')
+  
+    const addr = await ownerOf(tokenID)
+    await carol.flow({
+      recipient: addr,
+      flowRate: flowRate,
+    });
+
+    console.log('reached here 3')
+    
+    // details = await carol.details();
+    // console.log(details);
+};
+
+export const stopFlow = async (tokenID) => {
+  const accounts = await web3.eth.getAccounts();
+  const account = accounts[0];
+
+    // await sf.initialize();
+    console.log('reached here')
+    const carol = sf.user({
+      address: account,
+      token: '0x5D8B4C2554aeB7e86F387B4d6c00Ac33499Ed01f'
+    });
+
+    // var details = await carol.details();
+    // console.log(details);
+    console.log('reached here 2')
+  
+    const addr = await ownerOf(tokenID)
+    await carol.flow({
+      recipient: addr,
+      flowRate: '0',
+    });
+
+    console.log('reached here 3')
+    
+    // details = await carol.details();
+    // console.log(details);
+};
+
+export const getFlowBalance = async (addr) => {
+  const daix = sf.tokens.fDAIx;
+  const balance = wad4human(await daix.balanceOf(addr)); 
+  return balance;
+} 
