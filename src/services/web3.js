@@ -24,7 +24,7 @@ export const portis = new Portis(
 // export const web3 = new Web3(portis.provider);
 export const web3 = new Web3(Web3.givenProvider);
 // change to the orignal deployed address
-const contractAddr = "0x8eA63Ce6f19bd228ac01e1b66554ebb278512C47";
+const contractAddr = "0x598F79F90708B605fF79E35BB9dC95FA226d3151";
 export const NFT_TransferContract = new web3.eth.Contract(
   NFT_TransferAbi,
   contractAddr

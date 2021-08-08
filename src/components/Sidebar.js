@@ -1,17 +1,24 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import '../styles/Sidebar.css'
 // import { InlineIcon } from '@iconify/react';
 // import ethereumIcon from '@iconify-icons/mdi/ethereum';
 import Logout from './Logout';
 import { useHistory } from 'react-router-dom'
+import { getPriceFeed } from '../services/priceFeed';
 
 function Sidebar({showPortis, isLoggedIn, setWallet, setIsLoggedIn, wallet, email}) {
     const { push } = useHistory()
+    const [latestPrice, setLatestPrice] = useState(0);
+
+    useEffect(async () => {
+        const maticPrice = await getPriceFeed();
+        setLatestPrice(maticPrice);
+    }, [])
 
     return (
         <div className='sidebar'>
             <div className="sidebar__logo">
-                <h2>Depocalyse</h2>
+                <h2>Depocalypse</h2>
             </div>
 
             <div className="sidebar__options">
@@ -30,9 +37,10 @@ function Sidebar({showPortis, isLoggedIn, setWallet, setIsLoggedIn, wallet, emai
                 }
             </div>
 
-            
-
-            
+            <div className="sidebar__priceFeed">
+                <span>Price feed - Powered by <img src="https://cryptologos.cc/logos/chainlink-link-logo.png" alt="" /></span> 
+                <span>MATIC/USD - {latestPrice.toFixed(3)} $</span>
+            </div>
 
             {isLoggedIn && 
 
@@ -45,6 +53,9 @@ function Sidebar({showPortis, isLoggedIn, setWallet, setIsLoggedIn, wallet, emai
                                 {wallet}
                         </div>
                     </div> */}
+
+                    
+
 
                     <div className="sidebar__userInfo">
                         {email}
