@@ -368,6 +368,11 @@ export const NFT_TransferAbi =
 				"type": "bool"
 			},
 			{
+				"internalType": "bool",
+				"name": "_onCharity",
+				"type": "bool"
+			},
+			{
 				"internalType": "uint256",
 				"name": "_auctionType",
 				"type": "uint256"
@@ -1022,6 +1027,19 @@ export const NFT_TransferAbi =
 	},
 	{
 		"inputs": [],
+		"name": "getOnCharityTokens",
+		"outputs": [
+			{
+				"internalType": "uint256[]",
+				"name": "",
+				"type": "uint256[]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
 		"name": "getOnSaleTokens",
 		"outputs": [
 			{
@@ -1141,6 +1159,11 @@ export const NFT_TransferAbi =
 				"internalType": "bool",
 				"name": "onAuction",
 				"type": "bool"
+			},
+			{
+				"internalType": "bool",
+				"name": "onCharity",
+				"type": "bool"
 			}
 		],
 		"stateMutability": "view",
@@ -1254,4 +1277,4 @@ export const NFT_TransferAbi =
 		"stateMutability": "view",
 		"type": "function"
 	}
-]
+];
