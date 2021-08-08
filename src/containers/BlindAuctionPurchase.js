@@ -146,11 +146,19 @@ function BlindAuctionPurchase(props) {
                     
                 </div> 
                 <div className="purchase__artwork">
+                    {(auctionCompleted) && (auctionDetails.highestBidder === account) && 
+                        <h2>Congrats! You Won! 🎉</h2>
+                    }
+                    {
+                        (auctionCompleted) && (!isDisable) && (auctionDetails.highestBid !== yourBid) && (yourBid != 0) &&
+                        <h2>Sorry you didn't win 😅</h2>
+                    }
                     {data.image && <img src={dwebLink(data.image)} alt="nft artwork" />}
                 </div>
 
                 <div className="purchase__details">
                     <h1>#{tokenID} {data.name}</h1>
+                    <h2>Auction Type: Blind 👀</h2>
                     <h3>{data.description}</h3>
                     <div className="purchase__detailsBuy">
                         <div className="value">
@@ -166,14 +174,14 @@ function BlindAuctionPurchase(props) {
                             // eslint-disable-next-line
                             (auctionCompleted) && (!isDisable) && (auctionDetails.highestBid !== yourBid) && (yourBid != 0) &&
                             <React.Fragment>
-                                <h3>Sorry you didn't win</h3>
+                                {/* <h3>Sorry you didn't win</h3> */}
                                 <button onClick={withdraw}>Withdraw balance</button>
                             </React.Fragment>
                         }
                         {
                             (auctionCompleted) && (auctionDetails.highestBidder === account) && (currentOwner !== account) &&
                             <React.Fragment>
-                                <h3>Congrats! You Won!</h3>
+                                {/* <h3>Congrats! you won</h3> */}
                                 <button onClick={withdraw}>Claim your NFT</button>
                             </React.Fragment>
                         }
@@ -204,7 +212,6 @@ function BlindAuctionPurchase(props) {
                         </React.Fragment>
                         }
                     </div>
-                    <h2>Auction Type: Blind</h2>
                 </div>
             </div> 
     )

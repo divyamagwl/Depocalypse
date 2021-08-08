@@ -44,7 +44,7 @@
 
 .purchase__details > h3::-webkit-scrollbar {
     display: none;
-  }
+}
 
 .purchase__details > h3{
     height: 180px;
@@ -54,6 +54,11 @@
 
     -ms-overflow-style: none;  /* IE and Edge */
     scrollbar-width: none; /* Firefox */
+}
+
+.purchase__details > h2{
+    font-size: 18px;
+    margin: 0;
 }
 
 
@@ -87,6 +92,12 @@
 }
 
 .purchase__detailsBuy > button:disabled{
+    background: none;
+    border: 1px solid gray;
+    cursor: not-allowed;
+}
+
+.purchase_charity > button:disabled{
     background: none;
     border: 1px solid gray;
     cursor: not-allowed;
@@ -185,4 +196,77 @@
 
 .purchase__header > h3{
     color: #c497f8;
+}
+
+.purchase_charity > button{
+    
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    font-size: 16px;
+    margin: 5px;
+    border-radius: 6px;
+    flex: 0.4;
+}
+
+.purchase_charity > .charity__startFlow{
+    background: linear-gradient(90deg, #2ab44c 0%, #6bf087 100%);
+}
+
+.purchase_charity > .charity__stopFlow{
+    background: linear-gradient(90deg, #d53e39  0%, #eca46a 100%);
+}
+
+.purchase_charity > h1{
+    margin: 8px 0px;
+    font-size: 48px;
+}
+
+.purchase_charity > h2{
+    margin: 4px 0px;
+}
+
+.poweredBy{
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    color: white;
+}
+
+.MuiCircularProgress-svg{
+    color: rgb(193, 81, 193);
+    justify-self: center;
+}
+
+.purchase_charity > label{
+    font-weight: 300;
+}
+
+.purchase_charity > input{
+
+    font-size: 16px;
+    font-family: Arial, Helvetica, sans-serif;
+    background: rgba( 1, 0, 0, 0.10 );
+    /* box-shadow: 0 8px 32px 0 rgba(177, 75, 245, 0.05); */
+    backdrop-filter: blur( 1.0px );
+    -webkit-backdrop-filter: blur( 1.0px );
+    border-radius: 10px;
+    border: 1px solid rgba( 255, 255, 255, 0.18 );
+
+    outline-width: 0;
+    color: white;
+    width: 100%;
+    padding: 10px 6px;
+    margin: 8px 0px;
+    
+    box-sizing: border-box;
+    display: block;
+    border-radius: 8px;
+}
+
+.purchase__artwork > h2{
+    color: white;
 }

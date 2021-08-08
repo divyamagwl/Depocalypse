@@ -142,6 +142,7 @@ function DutchAuctionPurchase(props) {
 
                 <div className="purchase__details">
                     <h1>#{tokenID} {data.name}</h1>
+                    <h2>Auction Type: Dutch 🇳🇱</h2>
                     <h3>{data.description}</h3>
                     <div className="purchase__detailsBuy">
                         <div className="value">
@@ -158,7 +159,7 @@ function DutchAuctionPurchase(props) {
                             <h2>Current Price: {web3.utils.fromWei(currentPrice.toString())}</h2> 
                         </div>
                     </div>
-                    <h2>Auction Type: Dutch</h2>
+                    
                 </div>
             </div> 
     )

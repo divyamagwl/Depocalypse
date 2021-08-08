@@ -152,6 +152,7 @@ function EnglishAuctionPurchase(props) {
 
                 <div className="purchase__details">
                     <h1>#{tokenID} {data.name}</h1>
+                    <h2>Auction type: English 🏴󠁧󠁢󠁥󠁮󠁧󠁿</h2>
                     <h3>{data.description}</h3>
                     <div className="purchase__detailsBuy">
                         <div className="value">
@@ -201,7 +202,7 @@ function EnglishAuctionPurchase(props) {
                         </React.Fragment>
                         }
                     </div>
-                    <h2>Auction Type: English</h2>
+                    
                 </div>
             </div> 
     )
