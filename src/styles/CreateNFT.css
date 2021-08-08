@@ -85,6 +85,7 @@
   font-size: 16px;
   border-radius: 6px;
   width: 200px;
+  margin-right: 20px;
 }
 
 .goback{
@@ -111,5 +112,17 @@
 .poweredBy{
   display: flex;
   justify-content: space-evenly;
+  align-items: center;
+}
+
+.MuiCircularProgress-svg{
+  color: rgb(193, 81, 193);
+  flex: 1;
+  justify-self: center;
+}
+
+.create__submitButton{
+  margin-top: 20px;
+  display: flex;
   align-items: center;
 }

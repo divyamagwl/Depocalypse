@@ -72,7 +72,7 @@ function CreateNFT({wallet, isLoggedIn}) {
         //   setIsLoading(false);
         //   return;
         // }
-         
+        
         // var image = new File([''], "this.jpeg", {type: "image/*"});
         var image = dataURItoBlob(dataUri);
         // api key for nft.storage
@@ -93,6 +93,7 @@ function CreateNFT({wallet, isLoggedIn}) {
           weiPrice, 
           market==='Sell'? true : false, 
           market==='Auction'? true : false, 
+          market==='Charity'? true : false,
           auctionType, 
           duration,
           web3.utils.toWei(bidIcrement),
@@ -128,7 +129,7 @@ function CreateNFT({wallet, isLoggedIn}) {
             </div>
 
             <div className="create__details">
-              <h1>Mint a new NFT 🖌 {isLoading &&  <CircularProgress />}</h1>
+              <h1>Mint a new NFT 🖌 </h1>
               <form onSubmit={handleSubmit}>
                   <label>Name</label>
                   <input 
@@ -155,6 +156,7 @@ function CreateNFT({wallet, isLoggedIn}) {
                   >
                   <option value="Sell">Sell</option>
                   <option value="Auction">Auction</option>
+                  <option value="Charity">Charity</option>
                   </select>
 
                   {
@@ -278,7 +280,9 @@ function CreateNFT({wallet, isLoggedIn}) {
                     </React.Fragment>
                   }
 
-                  <button>Mint NFT </button>
+                  <div className="create__submitButton">
+                    <button>Mint NFT </button> {isLoading &&  <CircularProgress />}
+                  </div>
               </form>
             </div>
         </div>
