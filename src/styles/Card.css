@@ -75,7 +75,7 @@
     display: flex;
     flex: 1;
     justify-content: flex-end;
-
+    align-items: center;
     /* padding: 4px;
 
     background: rgba( 255, 255, 255, 0.1 );
@@ -92,4 +92,25 @@
 
 .card__infoValue > h3{
     margin: 0px;
+}
+
+.card__infoValue > h4{
+    margin: 0px 4px;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: Arial, Helvetica, sans-serif;
+    background: rgba( 1, 0, 0, 0.10 );
+    /* box-shadow: 0 8px 32px 0 rgba(177, 75, 245, 0.4); */
+    backdrop-filter: blur( 1.0px );
+    -webkit-backdrop-filter: blur( 1.0px );
+    border-radius: 10px;
+    border: 1px solid rgba( 255, 255, 255, 0.18 );
+
+    outline-width: 0;
+    color: white;
+    padding: 6px;
+    
+    box-sizing: border-box;
+    display: block;
+    border-radius: 8px;
 }

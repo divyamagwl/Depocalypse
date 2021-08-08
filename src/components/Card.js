@@ -29,6 +29,12 @@ function Card({tokenID, name, description, src, price}) {
                 </div>
             </div>
         </div>
+
+
+
+
+
+        
     )
 }
 
